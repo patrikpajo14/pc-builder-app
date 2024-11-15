@@ -5,13 +5,24 @@ export interface User {
   lastname: string;
   email: string;
   role: number;
+  phoneNumber?: string;
   activated?: number;
-  name?: string;
   image?: string;
 }
 
+export interface Session {
+  userID: number;
+  accessToken: string;
+  refreshToken: string;
+  tokenType?: string;
+  deviceId: string;
+  deviceName: string;
+  loginDate: string;
+  expire: string;
+  refreshExpire: string;
+}
+
 export interface Offer {
-  // Existing properties
   id: number;
   create_date: string;
   customer_name: string;
@@ -136,4 +147,13 @@ export interface FormParams {
   storages: Storage[];
   cases: Case[];
   powerSupplys: PowerSupply[];
+}
+
+export interface AuthState {
+  isLoading: boolean;
+  user: User | null;
+  accessToken: string;
+  refreshToken: string;
+  expire: string; // ISO string or Date
+  refresh_expire: string; // ISO string or Date
 }

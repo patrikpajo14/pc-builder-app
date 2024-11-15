@@ -4,6 +4,7 @@ import Sidebar from "@/components/Sidebar";
 import Image from "next/image";
 import PageLoader from "@/components/PageLoader/PageLoader";
 import { User } from "@/types";
+import ProtectedRoute from "@/guards/ProtectedRoute";
 
 export const metadata = {
   title: "Dashboard",
@@ -37,38 +38,40 @@ const DashboardLayout = async ({
 
   if (currentUser.activated === 0 && currentUser.role === 0) {
     return (
-      <section className="container-max">
-        <Nav currentUser={currentUser} />
-        <div className="inner card py-[20px] px-[35px] w-full md:w-1/2 mx-auto text-center">
-          <Image
-            src="/icons/ico_error.svg"
-            alt="error"
-            width={70}
-            height={70}
-            className="inline-block"
-          />
-          <h1 className="text-2xl font-bold mb-5 text-red-500">
-            Access denied!
-          </h1>
-          <p className="mb-3">
-            You dont have access to the app, please contact your administrator
-            to grant you access to the application.
-          </p>
-          <a href="mailto:admin@gmail.com" className="text-primary-red">
-            admin@gmail.com
-          </a>
-        </div>
-      </section>
+      <ProtectedRoute>
+        <section className="container-max">
+          <Nav currentUser={currentUser} />
+          <div className="inner card py-[20px] px-[35px] w-full md:w-1/2 mx-auto text-center">
+            <Image
+              src="/icons/ico_error.svg"
+              alt="error"
+              width={70}
+              height={70}
+              className="inline-block"
+            />
+            <h1 className="text-2xl font-bold mb-5 text-red-500">
+              Access denied!
+            </h1>
+            <p className="mb-3">
+              You dont have access to the app, please contact your administrator
+              to grant you access to the application.
+            </p>
+            <a href="mailto:admin@gmail.com" className="text-primary-red">
+              admin@gmail.com
+            </a>
+          </div>
+        </section>
+      </ProtectedRoute>
     );
   } else {
     return (
-      <>
+      <ProtectedRoute>
         <Sidebar currentUser={currentUser} />
         <section className="container-fluid">
           <Nav currentUser={currentUser} />
           {children}
         </section>
-      </>
+      </ProtectedRoute>
     );
   }
 };

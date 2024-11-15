@@ -1,14 +1,16 @@
 "use client";
 
-import axios from "axios";
 import { useCallback, useState } from "react";
-import { useForm, SubmitHandler, FieldErrors } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import Button from "@/components/Button";
 import Input from "@/components/forms/Input";
+import axiosInstance from "@/axios";
+import useGlobalStore from "@/store/globalStore";
 
 interface FormData {
-  name: string;
+  firstname: string;
+  lastname: string;
   email: string;
   password: string;
 }
@@ -16,6 +18,9 @@ interface FormData {
 const AuthForm: React.FC = () => {
   const [variant, setVariant] = useState<"LOGIN" | "REGISTER">("LOGIN");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const user = useGlobalStore((state) => state.user);
+  const setUser = useGlobalStore((state) => state.setUser);
+  const setSession = useGlobalStore((state) => state.setSession);
 
   const toggleVariant = useCallback(() => {
     setVariant((prevVariant) =>
@@ -30,54 +35,53 @@ const AuthForm: React.FC = () => {
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
-      name: "",
+      firstname: "",
+      lastname: "",
       email: "",
       password: "",
     },
   });
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
+  const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
 
-    /*if (variant === "REGISTER") {
-            axios
-                .post("/api/register", data)
-                .then(() =>
-                    signIn("credentials", {
-                        ...data,
-                        redirect: false,
-                    })
-                )
-                .then((callback) => {
-                    if (callback?.error) {
-                        toast.error("Invalid credentials!");
-                    }
-                    if (callback?.ok) {
-                        toast.success("User has been registered");
-                        router.push("/dashboard");
-                    }
-                })
-                .catch(() => toast.error("Something went wrong!"))
-                .finally(() => setIsLoading(false));
-        }
+    console.log("DATA", data);
+    const { firstname, lastname, email, password } = data;
 
-        if (variant === "LOGIN") {
-            signIn("credentials", {
-                ...data,
-                redirect: false,
-            })
-                .then((callback) => {
-                    if (callback?.error) {
-                        toast.error(callback.error);
-                    }
-                    if (callback?.ok && !callback?.error) {
-                        toast.success("Logged in successfully!");
-                        router.push("/dashboard");
-                    }
-                })
-                .catch((error) => toast.error(error))
-                .finally(() => setIsLoading(false));
-        }*/
+    console.log("MY USER ", user);
+
+    if (variant === "REGISTER") {
+      const response = await axiosInstance.post(`/api/auth/register`, {
+        firstname,
+        lastname,
+        email,
+        password,
+      });
+      console.log("REGISTER RESPONSE", response);
+      if (response?.status === 200) {
+        setUser(response?.data?.user);
+        setSession(response?.data?.session);
+        toast.success("User registered successfully!");
+      } else {
+        toast.error("Register failed!");
+      }
+    }
+
+    if (variant === "LOGIN") {
+      const response = await axiosInstance.post(`/api/auth/login`, {
+        email,
+        password,
+      });
+      if (response?.status === 200) {
+        setUser(response?.data?.user);
+        setSession(response?.data?.session);
+        toast.success("Logged in successfully!");
+      } else {
+        toast.error("Login failed!");
+      }
+      console.log("RESPONSE", response?.status, response?.data);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -89,14 +93,24 @@ const AuthForm: React.FC = () => {
       </h1>
       <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
         {variant === "REGISTER" && (
-          <Input
-            disabled={isLoading}
-            register={register}
-            errors={errors}
-            required
-            id="name"
-            label="Username"
-          />
+          <>
+            <Input
+              disabled={isLoading}
+              register={register}
+              errors={errors}
+              required
+              id="firstname"
+              label="First name"
+            />
+            <Input
+              disabled={isLoading}
+              register={register}
+              errors={errors}
+              required
+              id="lastname"
+              label="Last name"
+            />
+          </>
         )}
         <Input
           disabled={isLoading}
