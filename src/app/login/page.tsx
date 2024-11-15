@@ -1,5 +1,4 @@
 import AuthForm from "@/app/login/AuthForm";
-
 export default function LoginPage() {
   return (
     <section className="auth-page">

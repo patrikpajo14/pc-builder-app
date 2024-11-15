@@ -5,8 +5,9 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import Button from "@/components/Button";
 import Input from "@/components/forms/Input";
-import axiosInstance from "@/axios";
-import useGlobalStore from "@/store/globalStore";
+import axiosInstance from "@/axios/axios";
+import Cookies from "js-cookie";
+import { useAuthContext } from "@/context/auth/authContext";
 
 interface FormData {
   firstname: string;
@@ -18,9 +19,7 @@ interface FormData {
 const AuthForm: React.FC = () => {
   const [variant, setVariant] = useState<"LOGIN" | "REGISTER">("LOGIN");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const user = useGlobalStore((state) => state.user);
-  const setUser = useGlobalStore((state) => state.setUser);
-  const setSession = useGlobalStore((state) => state.setSession);
+  const { setLoginUserSuccess, addUserToLocalStorage } = useAuthContext();
 
   const toggleVariant = useCallback(() => {
     setVariant((prevVariant) =>
@@ -31,7 +30,6 @@ const AuthForm: React.FC = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -44,12 +42,7 @@ const AuthForm: React.FC = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
-
-    console.log("DATA", data);
     const { firstname, lastname, email, password } = data;
-
-    console.log("MY USER ", user);
-
     if (variant === "REGISTER") {
       const response = await axiosInstance.post(`/api/auth/register`, {
         firstname,
@@ -59,8 +52,32 @@ const AuthForm: React.FC = () => {
       });
       console.log("REGISTER RESPONSE", response);
       if (response?.status === 200) {
-        setUser(response?.data?.user);
-        setSession(response?.data?.session);
+        const { user, session } = response.data;
+
+        console.log("USER", user, "SESSION", session);
+
+        const { accessToken, refreshToken, expire, refreshExpire } = session;
+        setLoginUserSuccess(
+          user,
+          accessToken,
+          refreshToken,
+          expire,
+          refreshExpire,
+        );
+        addUserToLocalStorage(
+          user,
+          accessToken,
+          expire,
+          refreshExpire,
+          refreshToken,
+        );
+        Cookies.set("token", accessToken, {
+          expires: 1, // 1 day; adjust as needed
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          path: "/",
+        });
+
         toast.success("User registered successfully!");
       } else {
         toast.error("Register failed!");
@@ -73,8 +90,28 @@ const AuthForm: React.FC = () => {
         password,
       });
       if (response?.status === 200) {
-        setUser(response?.data?.user);
-        setSession(response?.data?.session);
+        const { user, session } = response.data;
+        const { accessToken, refreshToken, expire, refreshExpire } = session;
+        setLoginUserSuccess(
+          user,
+          accessToken,
+          refreshToken,
+          expire,
+          refreshExpire,
+        );
+        addUserToLocalStorage(
+          user,
+          accessToken,
+          expire,
+          refreshExpire,
+          refreshToken,
+        );
+        Cookies.set("token", accessToken, {
+          expires: 1, // 1 day; adjust as needed
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          path: "/",
+        });
         toast.success("Logged in successfully!");
       } else {
         toast.error("Login failed!");

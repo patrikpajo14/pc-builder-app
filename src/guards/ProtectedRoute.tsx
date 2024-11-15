@@ -1,5 +1,7 @@
+"use client";
+
 import React, { ReactNode, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/auth/authContext";
 import PageLoader from "@/components/PageLoader/PageLoader";
 

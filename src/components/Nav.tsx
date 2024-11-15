@@ -4,25 +4,32 @@ import Avatar from "./Avatar";
 import Button from "./Button";
 import Image from "next/image";
 import clsx from "clsx";
-import { User } from "@/types";
+import { useAuthContext } from "@/context/auth/authContext";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
-interface NavProps {
-  currentUser?: User;
-}
-
-const Nav: React.FC<NavProps> = ({ currentUser }) => {
+const Nav = () => {
   const [toggleDropdown, setToggleDropdown] = useState<boolean>(false);
+  const { user, logoutUser } = useAuthContext();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    setToggleDropdown(false);
+    logoutUser();
+    router.replace("/login");
+    Cookies.remove("token");
+  };
 
   return (
     <nav className="flex-col-reverse flex md:flex-row gap-3 flex-end md:items-center w-full mb-7 md:mb-16 pt-3">
       <div
         className={clsx(
           `flex justify-between w-[100%] md:w-max`,
-          currentUser?.activated === 1 && "justify-between",
-          currentUser?.activated === 0 && "flex-end",
+          user?.activated === 1 && "justify-between",
+          user?.activated === 0 && "flex-end",
         )}
       >
-        {currentUser?.activated !== 0 && (
+        {user?.activated !== 0 && (
           <button
             className="block md:hidden"
             onClick={() => {
@@ -38,11 +45,13 @@ const Nav: React.FC<NavProps> = ({ currentUser }) => {
             />
           </button>
         )}
-        {currentUser && (
+        {user && (
           <div className="flex relative gap-3 items-center">
-            <p>{currentUser.username}</p>
+            <p>
+              {user?.firstname} {user?.lastname}
+            </p>
             <Avatar
-              user={currentUser}
+              user={user}
               onClick={() => {
                 setToggleDropdown(!toggleDropdown);
               }}
@@ -50,13 +59,7 @@ const Nav: React.FC<NavProps> = ({ currentUser }) => {
 
             {toggleDropdown && (
               <div className="dropdown">
-                <Button
-                  onClick={() => {
-                    setToggleDropdown(false);
-                    // signOut();
-                  }}
-                  fullWidth
-                >
+                <Button onClick={handleLogout} fullWidth>
                   Sign Out
                 </Button>
               </div>

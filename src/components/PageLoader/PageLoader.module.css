@@ -7,7 +7,7 @@
 .box {
   width: 45%;
   height: 45%;
-  background: rgba(59, 162, 86, 0.7);
+  background: rgba(43, 164, 194, 0.7);
   opacity: 0;
   animation: load 1s linear infinite;
 }

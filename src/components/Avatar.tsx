@@ -3,7 +3,7 @@ import Image from "next/image";
 import { User } from "@/types";
 
 interface AvatarProps {
-  user?: User;
+  user?: User | null;
   onClick?: () => void;
 }
 
@@ -19,7 +19,10 @@ const Avatar: React.FC<AvatarProps> = ({ user, onClick }) => {
           className="rounded-full cursor-pointer"
         />
       ) : (
-        <div className="avatar">{user?.firstname?.charAt(0)}</div>
+        <div className="avatar">
+          {user?.firstname?.charAt(0)}
+          {user?.lastname?.charAt(0)}
+        </div>
       )}
     </div>
   );
