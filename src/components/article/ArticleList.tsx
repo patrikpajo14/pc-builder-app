@@ -5,18 +5,28 @@ import Article from "@/components/article/Article";
 import CustomDrawer from "@/components/CustomDrawer";
 import ArticleForm from "@/components/article/ArticleForm";
 import { Article as ArticleType } from "@/types";
+import {
+  useDeleteArticle,
+  useUpdateArticle,
+} from "@/queryHooks/useArticleData";
 
 interface ArticleListProps {
   articleList?: ArticleType[];
-  readOnly: boolean;
+  readOnly?: boolean;
 }
 
-const ArticleList: React.FC<ArticleListProps> = ({ articleList, readOnly }) => {
+const ArticleList: React.FC<ArticleListProps> = ({
+  articleList,
+  readOnly = false,
+}) => {
   const [openDrawer, setOpenDrawer] = useState<boolean>(false);
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<ArticleType | null>(
     null,
   );
+
+  const { mutate: deleteArticle } = useDeleteArticle();
+  const { mutate: updateArticle } = useUpdateArticle();
 
   const handleCloseDrawer = () => {
     setOpenDrawer(false);
@@ -33,7 +43,7 @@ const ArticleList: React.FC<ArticleListProps> = ({ articleList, readOnly }) => {
   };
 
   const handleDeleteArticle = (id: number) => {
-    //deleteArticleMutate(id);
+    deleteArticle(id);
   };
 
   const hasArticles = articleList && articleList.length > 0;
@@ -55,7 +65,7 @@ const ArticleList: React.FC<ArticleListProps> = ({ articleList, readOnly }) => {
                 setIsEdit(true);
               }}
               onSelect={handleSelectArticle}
-              onDelete={() => handleDeleteArticle(article.id)}
+              onDelete={() => handleDeleteArticle(article?.id)}
               openDrawer={handleOpenDrawer}
               offerItem={false}
             />

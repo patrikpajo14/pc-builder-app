@@ -60,14 +60,13 @@ export interface Place {
 export interface Article {
   id?: number | null;
   name: string;
-  processorId?: number | null;
-  motherboardId?: number | null;
-  graphicsCardId?: number | null;
-  memoryId?: number | null;
-  storageId?: number | null;
-  caseId?: number | null;
-  powerSupplyId?: number | null;
-  offerIds: number[];
+  processor: Processor;
+  motherboard: Motherboard;
+  graphicsCard: GraphicsCard;
+  memory: Memory;
+  storage: Storage;
+  caseEntity: Case;
+  powerSupply: PowerSupply;
 }
 
 // Case Interface

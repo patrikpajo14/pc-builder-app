@@ -4,23 +4,22 @@ import React from "react";
 import ArticleList from "@/components/article/ArticleList";
 import ArticleListHeader from "./components/ArticleListHeader";
 import Loader from "@/components/Loader/Loader";
-import { Article } from "@/types";
+import { useFetchArticles } from "@/queryHooks/useArticleData";
 
 const ArticleListPage: React.FC = () => {
-  /*if (isError) {
-    // Optionally, display the error message
-    return <div>Error fetching data: {error?.message || "Unknown error"}</div>;
-  }*/
+  const { data, isLoading, isError, error } = useFetchArticles();
 
-  const isLoading = false;
-  const data = [];
+  if (isError) {
+    return <div>Error fetching data: {error?.message || "Unknown error"}</div>;
+  }
+
+  console.log("ARTICLE LIST", data);
 
   return (
     <section>
       <ArticleListHeader />
       {isLoading ? (
         <div className="flex flex-col space-y-4">
-          {/* Display multiple loaders for better visual feedback */}
           <Loader />
           <Loader />
           <Loader />
