@@ -3,6 +3,7 @@
 import React, { ReactNode, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/auth/authContext";
+import PageLoader from "@/components/PageLoader/PageLoader";
 
 interface GuestGuardProps {
   children: ReactNode;
@@ -19,8 +20,7 @@ const GuestGuard: React.FC<GuestGuardProps> = ({ children }) => {
   }, [user, router]);
 
   if (user) {
-    // Optionally, you can return a loader or null
-    return null;
+    return <PageLoader />;
   }
 
   return <>{children}</>;

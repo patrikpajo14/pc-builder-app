@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { useAuthContext } from "@/context/auth/authContext";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { axiosPrivate } from "@/axios/axios";
 
 const Nav = () => {
   const [toggleDropdown, setToggleDropdown] = useState<boolean>(false);
@@ -15,6 +16,7 @@ const Nav = () => {
 
   const handleLogout = () => {
     setToggleDropdown(false);
+    delete axiosPrivate.defaults.headers["Authorization"];
     logoutUser();
     router.replace("/login");
     Cookies.remove("token");

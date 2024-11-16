@@ -1,5 +1,3 @@
-// src/components/users/UsersTable.tsx
-
 "use client";
 import React from "react";
 import {
@@ -10,32 +8,41 @@ import {
 } from "@/components/table";
 import UsersTableRow from "./UsersTableRow";
 import { User } from "@/types";
-import { dummyUsers } from "../../../public/data/dummyData"; // Ensure this path is correct based on your project structure
+import {
+  useDeleteUser,
+  useFetchUsers,
+  useUpdateUser,
+} from "@/queryHooks/useUsersData";
 
-// Define the structure of table headers
 interface TableHeadItem {
   id: string;
   label: string;
   align: "left" | "right" | "center";
 }
 
-// Define the table headers with proper typing
 const TABLE_HEAD: TableHeadItem[] = [
   { id: "id", label: "ID", align: "left" },
   { id: "customerName", label: "User Name", align: "left" },
   { id: "role", label: "Role", align: "left" },
   { id: "email", label: "Email", align: "left" },
   { id: "status", label: "Status", align: "left" },
-  { id: "options", label: "Options", align: "right" }, // Changed id from "" to "options" for clarity
+  { id: "options", label: "Options", align: "right" },
 ];
 
 const UsersTable: React.FC = () => {
-  // Handler to delete a user by ID
+  const { data: users, isLoading } = useFetchUsers();
+  const { mutate: deleteUser } = useDeleteUser();
+  const { mutate: updateUser } = useUpdateUser();
+
   const handleDeleteRow = (id: number) => {
-    //deleteUser(id);
+    deleteUser(id);
   };
 
-  const users = dummyUsers;
+  const handleUpdateRow = (user: User) => {
+    updateUser(user);
+  };
+
+  console.log("FREINDS DATA", users);
 
   return (
     <div className="card">
@@ -44,33 +51,28 @@ const UsersTable: React.FC = () => {
       </div>
       <TableResponsiveWrap>
         <table className="min-w-[800px]">
-          <TableHeadCustom
-            headLabel={TABLE_HEAD}
-            rowCount={users?.length ?? 0}
-          />
+          <TableHeadCustom headLabel={TABLE_HEAD} />
 
           <tbody>
-            {/* Render user rows if not loading and no error */}
-            {users?.map((row: User) => (
-              <UsersTableRow
-                key={row.id}
-                row={row}
-                onDeleteRow={() => handleDeleteRow(row.id)}
-                // onEditRow={() => handleEditRow(row.id)} // Uncomment and implement if needed
-              />
-            ))}
+            {!isLoading &&
+              users?.map((row: User) => (
+                <UsersTableRow
+                  key={row.id}
+                  row={row}
+                  onDeleteRow={() => handleDeleteRow(row.id)}
+                  onUpdateRow={handleUpdateRow}
+                />
+              ))}
 
-            {/* Render empty rows to maintain table height */}
             <TableEmptyRows
               emptyRows={users?.length > 0 ? Math.max(5 - users.length, 0) : 0}
               height={users?.length < 5 ? 60 : 0}
             />
 
-            {/* Render no data message */}
-            {/*<TableNoData
-              isNotFound={!users || users.length === 0)}
+            <TableNoData
+              isNotFound={!users || users.length === 0}
               title={isLoading ? "Table is loading..." : "No data in table"}
-            />*/}
+            />
           </tbody>
         </table>
       </TableResponsiveWrap>

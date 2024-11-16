@@ -11,35 +11,40 @@ const Administration = () => {
         <AdministrationForm
           title={"Add new Case"}
           btnText={"Add case"}
-          url={"/api/colors"}
+          url={"/api/case"}
         />
         <AdministrationForm
           title={"Add new Memory car"}
           btnText={"Add memory card"}
-          url={"/api/articleType"}
+          url={"/api/memory"}
           type={"memory"}
         />
         <AdministrationForm
           title={"Add new Motherboard"}
           btnText={"Add Motherboard"}
-          url={"/api/panel"}
+          url={"/api/motherboard"}
           type={"motherboard"}
         />
         <AdministrationForm
           title={"Add new Power supply"}
           btnText={"Add new"}
-          url={"/api/blindsType"}
+          url={"/api/power-supply"}
         />
         <AdministrationForm
           title={"Add new Processor"}
           btnText={"Add processor"}
-          url={"/api/blindsType"}
+          url={"/api/processor"}
           type={"processor"}
+        />
+        <AdministrationForm
+          title={"Add new Graphics card"}
+          btnText={"Add Graphics card"}
+          url={"/api/graphics-card"}
         />
         <AdministrationForm
           title={"Add new Storage"}
           btnText={"Add storage"}
-          url={"/api/blindsType"}
+          url={"/api/storage"}
           type={"storage"}
         />
       </div>

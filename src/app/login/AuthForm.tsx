@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import Button from "@/components/Button";
 import Input from "@/components/forms/Input";
-import axiosInstance from "@/axios/axios";
+import axiosInstance, { axiosPrivate } from "@/axios/axios";
 import Cookies from "js-cookie";
 import { useAuthContext } from "@/context/auth/authContext";
 
@@ -26,6 +26,8 @@ const AuthForm: React.FC = () => {
       prevVariant === "LOGIN" ? "REGISTER" : "LOGIN",
     );
   }, []);
+
+  console.log("AXIOS HEADERS ON LOGIN", axiosInstance.defaults.headers);
 
   const {
     register,
@@ -72,12 +74,13 @@ const AuthForm: React.FC = () => {
           refreshToken,
         );
         Cookies.set("token", accessToken, {
-          expires: 1, // 1 day; adjust as needed
+          expires: 1,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
           path: "/",
         });
-
+        axiosPrivate.defaults.headers["Authorization"] =
+          `Bearer ${accessToken}`;
         toast.success("User registered successfully!");
       } else {
         toast.error("Register failed!");
@@ -112,6 +115,8 @@ const AuthForm: React.FC = () => {
           sameSite: "strict",
           path: "/",
         });
+        axiosPrivate.defaults.headers["Authorization"] =
+          `Bearer ${accessToken}`;
         toast.success("Logged in successfully!");
       } else {
         toast.error("Login failed!");
@@ -119,6 +124,8 @@ const AuthForm: React.FC = () => {
       console.log("RESPONSE", response?.status, response?.data);
     }
     setIsLoading(false);
+
+    console.log("AXIOS HEADERS", axiosPrivate.defaults.headers);
   };
 
   return (

@@ -4,19 +4,15 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User } from "@/types";
-
-interface SidebarProps {
-  currentUser?: User;
-}
-
+import { useAuthContext } from "@/context/auth/authContext";
 interface SidebarItem {
   link: string;
   translate: string;
   icon: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentUser }) => {
+const Sidebar = () => {
+  const { user } = useAuthContext();
   const pathname = usePathname();
 
   const sidebarItems: SidebarItem[] = [
@@ -42,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentUser }) => {
     },
   ];
 
-  if (currentUser?.role === 1) {
+  if (user?.role === "ADMIN") {
     sidebarItems.push({
       link: "users",
       translate: "Users",

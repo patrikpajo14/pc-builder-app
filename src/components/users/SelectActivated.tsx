@@ -1,16 +1,11 @@
-// src/components/SelectActivated.tsx
-
 import React from "react";
 
-// Define a type for the status values
 type StatusType = 0 | 1;
 
-// Define the props interface
 interface SelectActivatedProps {
   onClick: (status: StatusType) => void;
 }
 
-// Define a constant array with status options and their labels
 const statusOptions: { value: StatusType; label: string }[] = [
   { value: 1, label: "Activated" },
   { value: 0, label: "Disabled" },

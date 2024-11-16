@@ -4,9 +4,9 @@ export interface User {
   firstname: string;
   lastname: string;
   email: string;
-  role: number;
+  role: string;
+  enabled: boolean;
   phoneNumber?: string;
-  activated?: number;
   image?: string;
 }
 

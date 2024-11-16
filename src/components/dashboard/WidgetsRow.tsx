@@ -4,6 +4,7 @@ import React from "react";
 import SmallWidget from "./SmallWidget";
 import WidgetWithGraph from "./WidgetWithGraph";
 import Loader from "../Loader/Loader";
+import axiosInstance, { axiosPrivate } from "@/axios/axios";
 
 interface Offer {
   status: string;
@@ -11,6 +12,14 @@ interface Offer {
 }
 
 const WidgetsRow: React.FC = () => {
+  console.log(
+    "AXIOS INSTANCE HEADERS AFTER LOGIN",
+    axiosInstance.defaults.headers,
+  );
+  console.log(
+    "AXIOS PRIVATE HEADERS AFTER LOGIN",
+    axiosPrivate.defaults.headers,
+  );
   /*const { data: offers, isLoading } = useGetOffers();
 
   if (isLoading || !offers) {

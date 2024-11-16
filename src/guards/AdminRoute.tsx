@@ -1,5 +1,4 @@
 import React, { ReactNode } from "react";
-import { Navigate } from "react-router-dom";
 import { useAuthContext } from "@/context/auth/authContext";
 
 interface AdminRouteProps {
