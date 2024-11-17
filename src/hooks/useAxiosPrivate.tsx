@@ -1,15 +1,28 @@
 import { useEffect } from "react";
+import { useAuthContext } from "@/context/auth/authContext";
+import useRefreshToken from "@/hooks/useRefreshToken";
+import useCheckExpireTokens from "@/hooks/useCheckExpireTokens";
+import { axiosPrivate } from "@/axios/axios";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 
-const useAxiosPrivate = () => {
+const UseAxiosPrivate = () => {
+  console.log("USE AXIOS PRIVATE");
   const { user, accessToken, logoutUser, expire, refresh_expire } =
     useAuthContext();
-  const navigate = useNavigate();
-  const { enqueueSnackbar } = useSnackbar();
-  const { translate } = useLocales();
+  const router = useRouter();
   const refresh = useRefreshToken();
   const { isTokenExpired, isRefreshTokenExpired } = useCheckExpireTokens(
     expire,
     refresh_expire,
+  );
+
+  console.log("ACCESS TOKEN", accessToken, "REFRESH EXOPIRE", refresh_expire);
+  console.log(
+    "IS TOKEN EXPIRED",
+    isTokenExpired,
+    "IS REFRESH EXOPIRED",
+    isRefreshTokenExpired,
   );
   useEffect(() => {
     let regeneratedTokens = {};
@@ -18,24 +31,26 @@ const useAxiosPrivate = () => {
         if (isTokenExpired) {
           if (isRefreshTokenExpired) {
             logoutUser();
-            navigate("/");
+            router.replace("/");
           } else {
             try {
               regeneratedTokens = await refresh();
 
               config.headers["Authorization"] =
-                `Bearer ${regeneratedTokens?.access_token}`;
+                `Bearer ${regeneratedTokens?.accessToken}`;
               config.headers["Userid"] = `${user?.id}`;
             } catch (error) {
               console.error("Error refreshing token:", error);
             }
           }
         }
+        console.log("BEFORE CHEK HEADERS");
         if (!config.headers["Authorization"]) {
           config.headers["Authorization"] = `Bearer ${
             regeneratedTokens?.access_token || accessToken
           }`;
           config.headers["Userid"] = `${user?.id}`;
+          console.log("ADDED HEADERS", config.headers);
         }
 
         return config;
@@ -51,15 +66,12 @@ const useAxiosPrivate = () => {
 
         if (error?.response?.status === 403 && !prevRequest?.sent) {
           prevRequest.sent = true;
-          navigate("/403");
+          router.replace("/403");
         }
         if (error?.response?.status === 401 && !prevRequest?.sent) {
           prevRequest.sent = true;
-          enqueueSnackbar(translate("session_expired"), {
-            variant: "error",
-          });
-
-          navigate("/");
+          toast.error("Session expired!");
+          router.replace("/");
           logoutUser();
         }
         return Promise.reject(error);
@@ -75,4 +87,4 @@ const useAxiosPrivate = () => {
   return axiosPrivate;
 };
 
-export default useAxiosPrivate;
+export default UseAxiosPrivate;

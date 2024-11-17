@@ -13,6 +13,7 @@ import Image from "next/image";
 import clsx from "clsx";
 import { Offer } from "@/types";
 import useDebounce from "@/hooks/useDebounce";
+import { useDeleteOffer, useFetchOffers } from "@/queryHooks/useOffersData";
 
 interface TableHead {
   id: string;
@@ -30,50 +31,19 @@ const TABLE_HEAD: TableHead[] = [
   { id: "", label: "Options", align: "right" },
 ];
 
-// Create dummy data for offers
-const offers: Offer[] = [
-  {
-    id: 1,
-    create_date: "2023-10-01",
-    customer_name: "John Doe",
-    customer_address: "123 Main St",
-    place: {
-      place_name: "New York",
-    },
-    status: "pending",
-    total: 1000,
-  },
-  {
-    id: 2,
-    create_date: "2023-10-02",
-    customer_name: "Jane Smith",
-    customer_address: "456 Elm St",
-    place: {
-      place_name: "Los Angeles",
-    },
-    status: "done",
-    total: 1500,
-  },
-  // Add more dummy offers as needed
-];
-
-// Set isLoading to false since we're using dummy data
-const isLoading = false;
-
 interface OffersTableProps {
   limit?: number;
 }
 
 const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
   const { push } = useRouter();
-  const [offersList, setOffersList] = useState<Offer[]>(offers);
   const [searchValue, setSearchValue] = useState<string>("");
   const [filterName, setFilterName] = useState<string>("");
   const debouncedSearchValue = useDebounce(searchValue, 500);
+  const { data: offers, status, isLoading } = useFetchOffers();
+  const [offersList, setOffersList] = useState<Offer[]>(offers);
 
-  // Comment out the data fetching hooks
-  // const { data: offers, isLoading } = useGetOffers();
-  // const { mutate: deleteOffer } = useDeleteOffer();
+  const { mutate: deleteOffer } = useDeleteOffer();
 
   useEffect(() => {
     if (searchValue.length > 3) {
@@ -84,7 +54,6 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
   }, [debouncedSearchValue, searchValue]);
 
   useEffect(() => {
-    // Update offersList when offers change (if using fetched data)
     setOffersList(offers);
   }, [offers]);
 
@@ -126,13 +95,11 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
       setOffersList(tmpList);
     }
   };
-
-  // Implement delete functionality
   const handleDeleteRow = (id: number) => {
-    // Remove the offer from the offersList
     setOffersList((prevOffers) =>
       prevOffers.filter((offer) => offer.id !== id),
     );
+    deleteOffer(id);
   };
 
   const handleEditRow = (id: number) => {
@@ -145,7 +112,7 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
 
   return (
     <div className="card">
-      <div className="p-4 flex items-center gap-5">
+      <div className="p-4 flex flex-between items-center gap-5 border-b border-gray-600 ">
         <h2 className="text-[18px] font-bold">Offers list</h2>
         <div className="relative">
           <input

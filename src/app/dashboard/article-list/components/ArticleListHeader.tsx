@@ -28,9 +28,7 @@ const ArticleListHeader: React.FC = () => {
         onClose={handleCloseDrawer}
         title="Create Article"
       >
-        test
-        {/* Article Form Inside the Drawer
-        <ArticleForm closeEvent={handleCloseDrawer} />*/}
+        <ArticleForm closeEvent={handleCloseDrawer} />
       </CustomDrawer>
     </>
   );

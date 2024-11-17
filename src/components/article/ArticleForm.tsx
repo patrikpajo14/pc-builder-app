@@ -1,14 +1,18 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
+import {
+  useForm,
+  SubmitHandler,
+  FormProvider,
+  useWatch,
+} from "react-hook-form";
 import Button from "@/components/Button";
 import Input from "@/components/forms/Input";
 import Select from "@/components/forms/Select";
 
-import Loader from "@/components/Loader/Loader";
 import {
   Article,
   Case,
@@ -17,198 +21,93 @@ import {
   Motherboard,
   PowerSupply,
   Processor,
+  Storage,
 } from "@/types";
-
-// src/data/dummyFormParams.ts
-
-import { FormParams } from "@/types";
-
-export const dummyFormParams: FormParams = {
-  processors: [
-    {
-      id: 1,
-      name: "Intel Core i9-12900K",
-      manufacturer: "Intel",
-      price: 589.99,
-      specifications: "16-Core (8P+8E) Intel Core i9-12900K Processor",
-      cores: 16,
-      clockSpeed: 3.2,
-      socket: "LGA1700",
-    },
-    {
-      id: 2,
-      name: "AMD Ryzen 9 5950X",
-      manufacturer: "AMD",
-      price: 799.99,
-      specifications: "16-Core, 32-Thread Unlocked Desktop Processor",
-      cores: 16,
-      clockSpeed: 3.4,
-      socket: "AM4",
-    },
-    // Add more processors as needed
-  ],
-  motherboards: [
-    {
-      id: 1,
-      name: "ASUS ROG Strix Z690-E",
-      manufacturer: "ASUS",
-      price: 549.99,
-      specifications: "Intel Z690 ATX Gaming Motherboard with PCIe 5.0",
-      socket: "LGA1700",
-    },
-    {
-      id: 2,
-      name: "MSI MPG X570 GAMING EDGE WIFI",
-      manufacturer: "MSI",
-      price: 299.99,
-      specifications: "AMD X570 ATX Gaming Motherboard with WiFi 6",
-      socket: "AM4",
-    },
-    // Add more motherboards as needed
-  ],
-  graphicsCards: [
-    {
-      id: 1,
-      name: "NVIDIA GeForce RTX 3080",
-      manufacturer: "NVIDIA",
-      price: 699.99,
-      specifications: "10GB GDDR6X Graphics Card with Ray Tracing",
-    },
-    {
-      id: 2,
-      name: "AMD Radeon RX 6800 XT",
-      manufacturer: "AMD",
-      price: 649.99,
-      specifications: "16GB GDDR6 Graphics Card with Ray Tracing",
-    },
-    // Add more graphics cards as needed
-  ],
-  memories: [
-    {
-      id: 1,
-      name: "Corsair Vengeance LPX",
-      manufacturer: "Corsair",
-      price: 119.99,
-      specifications: "16GB (2x8GB) DDR4 DRAM 3200MHz",
-      capacity: 16,
-    },
-    {
-      id: 2,
-      name: "G.Skill Trident Z RGB",
-      manufacturer: "G.Skill",
-      price: 199.99,
-      specifications: "32GB (2x16GB) DDR4 DRAM 3600MHz",
-      capacity: 32,
-    },
-    // Add more memory modules as needed
-  ],
-  storages: [
-    {
-      id: 1,
-      name: "Samsung 970 EVO Plus",
-      manufacturer: "Samsung",
-      price: 149.99,
-      specifications: "1TB NVMe M.2 SSD",
-      capacity: 1000,
-    },
-    {
-      id: 2,
-      name: "Western Digital Black SN850",
-      manufacturer: "Western Digital",
-      price: 179.99,
-      specifications: "2TB NVMe M.2 SSD",
-      capacity: 2000,
-    },
-    // Add more storage devices as needed
-  ],
-  cases: [
-    {
-      id: 1,
-      name: "NZXT H510",
-      manufacturer: "NZXT",
-      price: 69.99,
-      specifications: "Mid-Tower ATX Case with Tempered Glass Side Panel",
-    },
-    {
-      id: 2,
-      name: "Corsair 4000D Airflow",
-      manufacturer: "Corsair",
-      price: 94.99,
-      specifications: "Mid-Tower ATX Case with High Airflow",
-    },
-    // Add more cases as needed
-  ],
-  powerSupplys: [
-    {
-      id: 1,
-      name: "Corsair RM750x",
-      manufacturer: "Corsair",
-      price: 129.99,
-      specifications: "750W 80 PLUS Gold Modular Power Supply",
-    },
-    {
-      id: 2,
-      name: "EVGA SuperNOVA 650 G5",
-      manufacturer: "EVGA",
-      price: 119.99,
-      specifications: "650W 80 PLUS Gold Fully Modular Power Supply",
-    },
-    // Add more power supplies as needed
-  ],
-};
+import {
+  useFetchCase,
+  useFetchGraphicsCards,
+  useFetchMemory,
+  useFetchMotherboards,
+  useFetchPowerSupply,
+  useFetchProcessors,
+  useFetchStorage,
+} from "@/queryHooks/useComponentsData";
+import Loader from "@/components/Loader/Loader";
+import {
+  useCreateArticle,
+  useUpdateArticle,
+} from "@/queryHooks/useArticleData";
 
 interface ArticleFormProps {
   isEdit?: boolean;
   forOffer?: boolean;
-  article?: Article;
+  selectedArticle?: Article | null;
   createCustomArticle?: (article: Article) => void;
+  closeEvent?: () => void;
 }
 
 interface ArticleFormData {
-  processorId: string;
-  motherboardId: string;
-  graphicsCardId: string;
-  memoryId?: string;
-  storageId?: string;
-  caseId?: string;
-  price?: string;
-  powerSupplyId?: number;
+  processor: number;
+  motherboard: number;
+  graphicsCard: number;
+  memory: number;
+  storage: number;
+  caseEntity: number;
+  powerSupply: number;
+  price: number;
 }
 
 const ArticleForm: React.FC<ArticleFormProps> = ({
   isEdit = false,
   forOffer = false,
-  article,
+  selectedArticle,
   createCustomArticle,
+  closeEvent,
 }) => {
-  const formParams = dummyFormParams;
+  const [selectedProcessor, setSelectedProcessor] = useState<Processor>();
+  const [selectedMotherboard, setSelectedMotherboard] = useState<Motherboard>();
+  const [selectedGraphicscard, setSelectedGraphicscard] =
+    useState<GraphicsCard>();
+  const [selectedMemory, setSelectedMemory] = useState<Memory>();
+  const [selectedStorage, setSelectedStorage] = useState<Storage>();
+  const [selectedCase, setSelectedCase] = useState<Case>();
+  const [selectedPowersupply, setSelectedPowersupply] = useState<PowerSupply>();
   const [loading, setLoading] = useState<boolean>(false);
+  const { data: processors } = useFetchProcessors();
+  const { data: motherboards } = useFetchMotherboards();
+  const { data: graphicsCards } = useFetchGraphicsCards();
+  const { data: memory } = useFetchMemory();
+  const { data: storages } = useFetchStorage();
+  const { data: cases } = useFetchCase();
+  const { data: powerSupplys, isPending } = useFetchPowerSupply();
+  const { mutate: createArticle } = useCreateArticle();
+  const { mutate: updateArticle } = useUpdateArticle();
 
-  const ArticleSchema: Yup.SchemaOf<ArticleFormData> = Yup.object().shape({
-    processorId: Yup.string().required("Required"),
-    motherboardId: Yup.string().required("Required"),
-    graphicsCardId: Yup.string().required("Required"),
-    memoryId: Yup.string().required("Required"),
-    storageId: Yup.number().required("Required").positive("Must be positive"),
-    caseId: Yup.string().required("Required"),
-    powerSupplyId: Yup.number()
-      .required("Required")
-      .positive("Must be positive"),
-    price: Yup.string().required("Required"),
+  console.log("IS EDIT", isEdit);
+
+  const ArticleSchema = Yup.object().shape({
+    processor: Yup.number().required("Required"),
+    motherboard: Yup.number().required("Required"),
+    graphicsCard: Yup.number().required("Required"),
+    memory: Yup.number().required("Required"),
+    storage: Yup.number().required("Required"),
+    caseEntity: Yup.number().required("Required"),
+    powerSupply: Yup.number().required("Required"),
+    price: Yup.number().required("Required"),
   });
 
   const defaultValues: ArticleFormData = useMemo(
     () => ({
-      processorId: article?.processorId?.toString() || "",
-      motherboardId: article?.motherboardId?.toString() || "",
-      graphicsCardId: article?.graphicsCardId?.toString() || "",
-      memoryId: article?.memoryId || "",
-      storageId: article?.storageId || "",
-      caseId: article?.caseId?.toString() || "",
-      powerSupplyId: article?.powerSupplyId || 0,
-      price: 0,
+      processor: selectedArticle?.processor?.id || 0,
+      motherboard: selectedArticle?.motherboard?.id || 0,
+      graphicsCard: selectedArticle?.graphicsCard?.id || 0,
+      memory: selectedArticle?.memory?.id || 0,
+      storage: selectedArticle?.storage?.id || 0,
+      caseEntity: selectedArticle?.caseEntity?.id || 0,
+      powerSupply: selectedArticle?.powerSupply?.id || 0,
+      price: selectedArticle?.price || 0,
     }),
-    [article],
+    [selectedArticle],
   );
 
   const methods = useForm<ArticleFormData>({
@@ -220,10 +119,93 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
     reset,
     handleSubmit,
     register,
+    setValue,
+    control,
     formState: { errors },
   } = methods;
 
+  // Watch all component fields
+  const watchedFields = useWatch({
+    control,
+    name: [
+      "processor",
+      "motherboard",
+      "graphicsCard",
+      "memory",
+      "storage",
+      "caseEntity",
+      "powerSupply",
+    ],
+  });
+
+  useEffect(() => {
+    const [
+      processorId,
+      motherboardId,
+      graphicsCardId,
+      memoryId,
+      storageId,
+      caseId,
+      powerSupplyId,
+    ] = watchedFields;
+
+    setSelectedProcessor(
+      processors?.find((p: Processor) => p.id == processorId),
+    );
+    setSelectedMotherboard(
+      motherboards?.find((m: Motherboard) => m.id == motherboardId),
+    );
+    setSelectedGraphicscard(
+      graphicsCards?.find((g: GraphicsCard) => g.id == graphicsCardId),
+    );
+    setSelectedMemory(memory?.find((m: Memory) => m.id == memoryId));
+    setSelectedStorage(storages?.find((s: Storage) => s.id == storageId));
+    setSelectedCase(cases?.find((c: Case) => c.id == caseId));
+    setSelectedPowersupply(
+      powerSupplys?.find((p: PowerSupply) => p.id == powerSupplyId),
+    );
+
+    const totalPrice =
+      (selectedProcessor?.price || 0) +
+      (selectedMotherboard?.price || 0) +
+      (selectedGraphicscard?.price || 0) +
+      (selectedMemory?.price || 0) +
+      (selectedStorage?.price || 0) +
+      (selectedCase?.price || 0) +
+      (selectedPowersupply?.price || 0);
+
+    setValue("price", parseInt(totalPrice), { shouldValidate: true });
+  }, [
+    watchedFields,
+    processors,
+    motherboards,
+    graphicsCards,
+    memory,
+    storages,
+    cases,
+    powerSupplys,
+    setValue,
+  ]);
+
   const onSubmit: SubmitHandler<ArticleFormData> = async (data) => {
+    const completeArticle = {
+      processor: selectedProcessor || null,
+      motherboard: selectedMotherboard || null,
+      graphicsCard: selectedGraphicscard || null,
+      memory: selectedMemory || null,
+      storage: selectedStorage || null,
+      caseEntity: selectedCase || null,
+      powerSupply: selectedPowersupply || null,
+      // price: data.price,
+    };
+
+    console.log("Complete Article:", completeArticle);
+    if (isEdit) {
+      updateArticle({ id: selectedArticle.id, article: completeArticle });
+    } else {
+      createArticle(completeArticle as Article);
+    }
+
     /*if (!forOffer) {
       try {
         setLoading(true);
@@ -252,10 +234,10 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
           (color) => color.id === Number(data.graphicsCardId),
         );
         const blinds = formParams.blindsTypes.find((blinds) => {
-          if (data.caseId === "") {
+          if (data.case === "") {
             return blinds.name === "none";
           }
-          return blinds.id === Number(data.caseId);
+          return blinds.id === Number(data.case);
         });
 
         if (!type || !panel || !color) {
@@ -274,162 +256,157 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
           blinds: blinds || undefined,
         };
         createCustomArticle && createCustomArticle(customArticle);
-        refetchId();
         reset();
-        setHaveBlinds(false);
       }
     }*/
   };
 
-  /* if (paramsLoading || isFetching) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader />
-      </div>
-    );
-  }*/
+  const isDataLoading =
+    !processors ||
+    !motherboards ||
+    !graphicsCards ||
+    !memory ||
+    !storages ||
+    !cases ||
+    !powerSupplys;
 
   return (
-    <>
-      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-7">
-          <h2 className="text-xl font-bold mb-4">Type of Article</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-5">
-            <Select
-              label="Processor"
-              placeholder="Select processor..."
-              disabled={loading}
-              {...register("processorId")}
-              error={!!errors.processorId}
-              helperText={errors.processorId?.message}
-            >
-              <option value="">Select processor...</option>
-              {formParams?.processors?.map((option: Processor) => (
-                <option key={option.id} value={option.id || 1}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>
-            <Select
-              label="Motherboard"
-              placeholder="Select motherboard..."
-              disabled={loading}
-              {...register("motherboardId")}
-              error={!!errors.motherboardId}
-              helperText={errors.motherboardId?.message}
-            >
-              <option value="">Select motherboard...</option>
-              {formParams?.motherboards?.map((option: Motherboard) => (
-                <option key={option.id} value={option.id || 1}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>
+          <h2 className="text-xl font-bold mb-4">Article Components</h2>
+          {isPending || isDataLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-5">
+              <Select
+                label="Processor"
+                placeholder="Select processor..."
+                disabled={loading}
+                {...register("processor")}
+                error={!!errors.processor}
+                helperText={errors.processor?.message}
+              >
+                {processors?.map((option: Processor) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} ({option.price}€)
+                  </option>
+                ))}
+              </Select>
+              <Select
+                label="Motherboard"
+                placeholder="Select motherboard..."
+                disabled={loading}
+                {...register("motherboard")}
+                error={!!errors.motherboard}
+                helperText={errors.motherboard?.message}
+              >
+                {motherboards?.map((option: Motherboard) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} ({option.price}€)
+                  </option>
+                ))}
+              </Select>
 
-            <Select
-              label="Graphics card"
-              placeholder="Select graphics card..."
-              disabled={loading}
-              {...register("graphicsCardId")}
-              error={!!errors.graphicsCardId}
-              helperText={errors.graphicsCardId?.message}
-            >
-              <option value="">Select graphics card...</option>
-              {formParams?.graphicsCards?.map((option: GraphicsCard) => (
-                <option key={option.id} value={option.id || 1}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>
+              <Select
+                label="Graphics Card"
+                placeholder="Select graphics card..."
+                disabled={loading}
+                {...register("graphicsCard")}
+                error={!!errors.graphicsCard}
+                helperText={errors.graphicsCard?.message}
+              >
+                {graphicsCards?.map((option: GraphicsCard) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} ({option.price}€)
+                  </option>
+                ))}
+              </Select>
 
-            <Select
-              label="Memory"
-              placeholder="Select memory..."
-              disabled={loading}
-              {...register("memoryId")}
-              errors={errors.memoryId}
-              helperText={errors.memoryId?.message}
-            >
-              <option value="">Select memory...</option>
-              {formParams?.memories?.map((option: Memory) => (
-                <option key={option.id} value={option.id || 1}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>
+              <Select
+                label="Memory"
+                placeholder="Select memory..."
+                disabled={loading}
+                {...register("memory")}
+                error={!!errors.memory}
+                helperText={errors.memory?.message}
+              >
+                {memory?.map((option: Memory) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} ({option.price}€)
+                  </option>
+                ))}
+              </Select>
 
-            <Select
-              label="Storage"
-              placeholder="Select storage..."
-              disabled={loading}
-              {...register("storageId")}
-              error={!!errors.storageId}
-              helperText={errors.storageId?.message}
-            >
-              <option value="">Select storage...</option>
-              {formParams?.storages?.map((option: Storage) => (
-                <option key={option.id} value={option.id || 1}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>
+              <Select
+                label="Storage"
+                placeholder="Select storage..."
+                disabled={loading}
+                {...register("storage")}
+                error={!!errors.storage}
+                helperText={errors.storage?.message}
+              >
+                {storages?.map((option: Storage) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} ({option.price}€)
+                  </option>
+                ))}
+              </Select>
 
-            <Select
-              label="Case"
-              placeholder="Select case..."
-              disabled={loading}
-              {...register("caseId")}
-              error={!!errors.caseId}
-              helperText={errors.caseId?.message}
-            >
-              <option value="">Select case...</option>
-              {formParams?.cases?.map((option: Case) => (
-                <option key={option.id} value={option.id || 1}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>
+              <Select
+                label="Case"
+                placeholder="Select case..."
+                disabled={loading}
+                {...register("caseEntity")}
+                error={!!errors.caseEntity}
+                helperText={errors.caseEntity?.message}
+              >
+                {cases?.map((option: Case) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} ({option.price}€)
+                  </option>
+                ))}
+              </Select>
 
-            <Select
-              label="Power supply"
-              placeholder="Select power supply..."
-              disabled={loading}
-              {...register("powerSupplyId")}
-              error={!!errors.powerSupplyId}
-              helperText={errors.powerSupplyId?.message}
-            >
-              <option value="">Select power supply...</option>
-              {formParams?.powerSupplys?.map((option: PowerSupply) => (
-                <option key={option.id} value={option.id || 1}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>
-          </div>
+              <Select
+                label="Power Supply"
+                placeholder="Select power supply..."
+                disabled={loading}
+                {...register("powerSupply")}
+                error={!!errors.powerSupply}
+                helperText={errors.powerSupply?.message}
+              >
+                {powerSupplys?.map((option: PowerSupply) => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} ({option.price}€)
+                  </option>
+                ))}
+              </Select>
+              <Input
+                errors={errors}
+                required
+                register={register}
+                id="price"
+                label={"Total Price €"}
+                type="number"
+                readOnly
+                min={0}
+                step="0.01"
+              />
+            </div>
+          )}
         </div>
         <div className="mb-7">
-          <h2 className="text-xl font-bold mb-4">Price</h2>
-          <div className="grid grid-cols-1">
-            <Input
-              disabled={loading}
-              error={!!errors.price}
-              helperText={errors.price?.message}
-              {...register("price")}
-              id="price"
-              label="Price €"
-              type="number"
-              min={0}
-              step="0.01"
-            />
-          </div>
           <div className="pt-6">
             <Button disabled={loading} fullWidth type="submit">
               {!isEdit ? "Create Article" : "Update Article"}
             </Button>
           </div>
         </div>
-      </FormProvider>
-    </>
+      </form>
+    </FormProvider>
   );
 };
 

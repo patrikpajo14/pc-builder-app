@@ -1,5 +1,4 @@
-"use client"; // Ensure this directive is present if using Next.js 13 App Router
-
+"use client";
 import React from "react";
 import PageSubheader from "@/components/PageSubheader";
 import { OffersTable } from "@/components/offers";

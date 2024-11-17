@@ -1,56 +1,51 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import clsx from "clsx";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { FieldErrors } from "react-hook-form";
 
 interface SelectProps {
   label: string;
-  value?: string;
   children: React.ReactNode;
   disabled?: boolean;
   name: string;
-  errors?: FieldErrors<any> | undefined;
+  error?: boolean;
+  helperText?: string;
   placeholder?: string;
-  register: UseFormRegister<any>;
   required?: boolean | string;
   onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   reset?: boolean;
 }
 
-const Select: React.FC<SelectProps> = ({
+const Select: React.FC<
+  SelectProps & React.SelectHTMLAttributes<HTMLSelectElement>
+> = ({
   label,
-  value,
   children,
   disabled,
   name,
-  errors,
+  error,
+  helperText,
   placeholder,
-  register,
   required,
   onChange,
   reset,
+  ...rest
 }) => {
-  const [selectedValue, setSelectedValue] = useState<string>(value ?? "");
-
   return (
     <div className="z-[100]">
-      <label className="block sm:text-[16px] text-xs font-medium text-gray-900">
+      <label
+        className="block sm:text-[16px] text-xs font-medium text-white"
+        htmlFor={name}
+      >
         {label}
       </label>
       <div className="mt-[5px] relative">
         <select
           disabled={disabled}
           id={name}
-          value={selectedValue}
-          {...register(name, { required })}
-          onChange={(e) => {
-            if (!reset) {
-              setSelectedValue(e.target.value);
-            } else if (onChange) {
-              onChange(e);
-            }
-          }}
+          name={name}
+          onChange={onChange}
           className={clsx(
             `
               block 
@@ -58,15 +53,15 @@ const Select: React.FC<SelectProps> = ({
               rounded-[5px] 
               py-[8px]
               px-[12px]
-              sm:py-[10.5px]
+              sm:py-[10px]
               sm:px-[15px]
-              text-black
+              text-white
               border-1
               border
-              bg-primary-lightred 
-              border-primary-gray 
-              placeholder:text-gray-400 
-              focus:bg-white
+              bg-gray-500  
+              border-gray-600
+              placeholder:text-gray-300 
+              focus:bg-gray-600
               focus:outline-none
               focus:ring-transparent
               text-sm
@@ -74,7 +69,9 @@ const Select: React.FC<SelectProps> = ({
               capitalize
             `,
             disabled && "opacity-50 cursor-default",
+            error && "border-red-500",
           )}
+          {...rest}
         >
           {placeholder && (
             <option value="" disabled>
@@ -83,12 +80,12 @@ const Select: React.FC<SelectProps> = ({
           )}
           {children}
         </select>
-        {errors && errors[name] && (
+        {error && helperText && (
           <label
             htmlFor={name}
             className="absolute top-[100%] right-0 text-primary-red text-sm"
           >
-            {errors[name]?.message || "Error"}
+            {helperText}
           </label>
         )}
       </div>

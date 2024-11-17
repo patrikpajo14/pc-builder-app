@@ -11,8 +11,13 @@ const fetchArticleById = (id: number) => {
   return axiosPrivate.get(`/api/pc/${id}`);
 };
 
-const updateArticle = (article: Article) => {
-  return axiosPrivate.put(`/api/pc/${article?.id}`, article);
+const createArticle = (article: Article) => {
+  return axiosPrivate.post(`/api/pc`, article);
+};
+
+const updateArticle = (article: { id: number; article: Article }) => {
+  console.log("UPDATE ARTI>CLE ", article);
+  return axiosPrivate.put(`/api/pc/${article?.id}`, article?.article);
 };
 
 const deleteArticle = (id: number) => {
@@ -33,6 +38,25 @@ export const useFetchArticleById = (articleId: number) => {
     queryFn: () => fetchArticleById(articleId),
     enabled: !!articleId,
     select: (response) => response.data,
+  });
+};
+
+export const useCreateArticle = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createArticle,
+    onSuccess: async (response) => {
+      console.log("CREATE ARTICLE RESPONSE", response);
+      if (response.status === 200 || response.status === 201) {
+        queryClient.invalidateQueries({ queryKey: ["article-list"] });
+        toast.success("Article created successful!");
+      }
+      return response;
+    },
+    onError: (error) => {
+      console.log("ERROR", error.message);
+      toast.error("Create article failed!");
+    },
   });
 };
 

@@ -10,7 +10,7 @@ interface ArticleProps {
   openDrawer: () => void;
   article: ArticleItem;
   readOnly: boolean;
-  setEdit: (value: boolean) => void;
+  setEdit: () => void;
   onSelect: (article: ArticleItem) => void;
   onDelete: () => void;
   offerItem?: boolean;
@@ -30,7 +30,7 @@ const Article: React.FC<ArticleProps> = ({
   const handleEdit = () => {
     openDrawer();
     onSelect(article);
-    setEdit(true);
+    setEdit();
   };
   const handleDelete = () => {
     setOpenConfirm(false);
@@ -44,7 +44,7 @@ const Article: React.FC<ArticleProps> = ({
   return (
     <>
       <div className="flex flex-col w-full shadow-main rounded-lg mb-4 md:flex-row bg-gray-700">
-        <div className="w-full md:w-44 border-b-gray-600 md:border-r-gray-600 md:border-b-gray-700 border-b border-r p-4 md:p-5">
+        <div className="w-full md:w-44 border-r-gray-700 border-b-gray-600 md:border-r-gray-600 md:border-b-gray-700 border-b border-r p-4 md:p-5">
           <Image
             src={"/pc-case.png"}
             width={75}
@@ -84,7 +84,7 @@ const Article: React.FC<ArticleProps> = ({
                     article.caseEntity?.price +
                     article.powerSupply?.price || 0,
                 ),
-              )}
+              ).toFixed(2)}
               €
             </p>
           </div>

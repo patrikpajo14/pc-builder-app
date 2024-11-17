@@ -2,8 +2,10 @@ import { axiosPrivate } from "@/axios/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { User } from "@/types";
+import UseAxiosPrivate from "@/hooks/useAxiosPrivate";
 
 const fetchUsers = () => {
+  console.log("AXIOS HEADERS ON FETCH USERS", axiosPrivate.defaults.headers);
   return axiosPrivate.get(`/api/users`);
 };
 
@@ -16,6 +18,8 @@ const deleteUser = (id: number) => {
 };
 
 export const useFetchUsers = () => {
+  const axiosPrivate = UseAxiosPrivate();
+  console.log("AXIOS PRIVATE", axiosPrivate.defaults.headers);
   return useQuery({
     queryKey: ["users"],
     queryFn: () => fetchUsers(),

@@ -7,18 +7,13 @@ import Loader from "@/components/Loader/Loader";
 import { useFetchArticles } from "@/queryHooks/useArticleData";
 
 const ArticleListPage: React.FC = () => {
-  const { data, isLoading, isError, error } = useFetchArticles();
-
-  if (isError) {
-    return <div>Error fetching data: {error?.message || "Unknown error"}</div>;
-  }
-
+  const { data, status, error } = useFetchArticles();
   console.log("ARTICLE LIST", data);
 
   return (
     <section>
       <ArticleListHeader />
-      {isLoading ? (
+      {status === "pending" ? (
         <div className="flex flex-col space-y-4">
           <Loader />
           <Loader />
@@ -27,6 +22,8 @@ const ArticleListPage: React.FC = () => {
           <Loader />
           <Loader />
         </div>
+      ) : status === "error" ? (
+        <div>Error fetching data: {error?.message || "Unknown error"}</div>
       ) : (
         <>
           {data && data.length < 1 ? (

@@ -1,20 +1,30 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Nav from "@/components/Nav";
 import Sidebar from "@/components/Sidebar";
 import Image from "next/image";
 import PageLoader from "@/components/PageLoader/PageLoader";
 import { useAuthContext } from "@/context/auth/authContext";
+import { axiosPrivate } from "@/axios/axios";
 
 interface AuthCheckerProps {
   children: React.ReactNode;
 }
 
 const AuthChecker: React.FC<AuthCheckerProps> = ({ children }) => {
-  const { user } = useAuthContext();
+  const { user, accessToken } = useAuthContext();
 
   console.log("USER LOGED", user);
+  useEffect(() => {
+    if (user && accessToken) {
+      if (!axiosPrivate.defaults.headers["Authorization"]) {
+        axiosPrivate.defaults.headers["Authorization"] =
+          `Bearer ${accessToken}`;
+        console.log("ADDED HEADERS", axiosPrivate.defaults.headers);
+      }
+    }
+  }, [user, accessToken]);
 
   if (!user) {
     return <PageLoader />;
@@ -36,7 +46,7 @@ const AuthChecker: React.FC<AuthCheckerProps> = ({ children }) => {
             Access Denied!
           </h1>
           <p className="mb-3">
-            You don't have access to the app. Please contact your administrator
+            You dont have access to the app. Please contact your administrator
             to grant you access to the application.
           </p>
           <a href="mailto:admin@gmail.com" className="text-primary-red">

@@ -5,10 +5,7 @@ import Article from "@/components/article/Article";
 import CustomDrawer from "@/components/CustomDrawer";
 import ArticleForm from "@/components/article/ArticleForm";
 import { Article as ArticleType } from "@/types";
-import {
-  useDeleteArticle,
-  useUpdateArticle,
-} from "@/queryHooks/useArticleData";
+import { useDeleteArticle } from "@/queryHooks/useArticleData";
 
 interface ArticleListProps {
   articleList?: ArticleType[];
@@ -26,7 +23,6 @@ const ArticleList: React.FC<ArticleListProps> = ({
   );
 
   const { mutate: deleteArticle } = useDeleteArticle();
-  const { mutate: updateArticle } = useUpdateArticle();
 
   const handleCloseDrawer = () => {
     setOpenDrawer(false);
@@ -78,7 +74,7 @@ const ArticleList: React.FC<ArticleListProps> = ({
         onClose={handleCloseDrawer}
         title={isEdit ? "Edit Article" : "Create Article"}
       >
-        <div>test</div>
+        <ArticleForm selectedArticle={selectedArticle} isEdit={isEdit} />
       </CustomDrawer>
     </section>
   );

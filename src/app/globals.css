@@ -143,7 +143,7 @@ body.sidebar-open .sidebar {
 /* Tailwind Styles */
 
 .sidebar {
-  @apply absolute transition-all left-[-100%] z-50 md:z-0 h-[100%] md:relative md:left-0 w-[100%] md:w-[60px] md:h-[auto] shadow-main bg-gray-700 xl:w-[300px];
+  @apply absolute transition-all left-[-100%] z-50 md:z-0 h-[100%] md:sticky md:left-0 w-[100%] md:w-[60px] md:h-[auto] md:top-0 md:h-[100vh] shadow-main bg-gray-700 xl:w-[300px];
 }
 
 .sidebar-link {
