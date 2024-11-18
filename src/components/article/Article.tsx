@@ -7,9 +7,9 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { Article as ArticleItem } from "@/types";
 
 interface ArticleProps {
-  openDrawer: () => void;
+  openDrawer?: () => void;
   article: ArticleItem;
-  readOnly: boolean;
+  readOnly?: boolean;
   setEdit: () => void;
   onSelect: (article: ArticleItem) => void;
   onDelete: () => void;
@@ -19,7 +19,7 @@ interface ArticleProps {
 const Article: React.FC<ArticleProps> = ({
   openDrawer,
   article,
-  readOnly,
+  readOnly = false,
   setEdit,
   onSelect,
   onDelete,

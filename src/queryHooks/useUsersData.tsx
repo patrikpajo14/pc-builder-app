@@ -18,8 +18,6 @@ const deleteUser = (id: number) => {
 };
 
 export const useFetchUsers = () => {
-  const axiosPrivate = UseAxiosPrivate();
-  console.log("AXIOS PRIVATE", axiosPrivate.defaults.headers);
   return useQuery({
     queryKey: ["users"],
     queryFn: () => fetchUsers(),

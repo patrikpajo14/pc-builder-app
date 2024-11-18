@@ -156,3 +156,11 @@ export interface AuthState {
   expire: string; // ISO string or Date
   refresh_expire: string; // ISO string or Date
 }
+
+export interface DashboardData {
+  totalOffers: number;
+  offersDone: number;
+  offersPending: number;
+  offersRejected: number;
+  lastOffers: Offer[];
+}

@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm, SubmitHandler, FormProvider } from "react-hook-form";
 import Button from "@/components/Button";
 import Input from "@/components/forms/Input";
-import Select from "@/components/forms/Select";
 import Article from "@/components/article/Article";
 import ArticleForm from "@/components/article/ArticleForm";
 import CustomDrawer from "@/components/CustomDrawer";
-import { Offer, Article as ArticleType } from "@/types"; // Assuming Article is defined in types
-import { ChangeEvent } from "react";
+import { Offer, Article as ArticleType, PowerSupply } from "@/types";
+import { useFetchArticles } from "@/queryHooks/useArticleData";
+import Select from "@/components/forms/Select";
 
 interface OffersFormProps {
   isEdit?: boolean;
@@ -24,16 +24,21 @@ interface OffersFormData {
   city: string;
   email: string;
   phone: string;
+  article: string;
 }
 
 const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedArticles, setSelectedArticles] = useState<ArticleType[]>(
-    offer ? offer.articleList : [],
+    offer ? offer?.pcId : [],
   );
   const [customArticles, setCustomArticles] = useState<ArticleType[]>([]);
   const [articleList, setArticleList] = useState<ArticleType[]>([]);
   const [openDrawer, setOpenDrawer] = useState<boolean>(false);
+
+  const { data: articles, status } = useFetchArticles();
+
+  console.log("ARTICLES", articles);
 
   const handleCloseDrawer = () => {
     setOpenDrawer(false);
@@ -49,6 +54,7 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
     city: Yup.string().required("Required"),
     email: Yup.string().email("Invalid email").required("Required"),
     phone: Yup.string().required("Required"),
+    article: Yup.string(),
   });
 
   const defaultValues: OffersFormData = useMemo(
@@ -58,6 +64,7 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
       city: offer?.place?.place_name || "",
       email: offer?.customer_email || "",
       phone: offer?.customer_phone || "",
+      article: "",
     }),
     [offer],
   );
@@ -87,10 +94,10 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
     setArticleList([...selectedArticles, ...customArticles]);
   }, [selectedArticles, customArticles]);
 
-  /* const handleOnSelect = (event: ChangeEvent<HTMLSelectElement>) => {
+  const handleOnSelect = (event: ChangeEvent<HTMLSelectElement>) => {
     const selectedId = Number(event.target.value);
-    const selectedArticle = articlesData?.find(
-      (article) => article.id === selectedId,
+    const selectedArticle = articles?.find(
+      (article: ArticleType) => article.id === selectedId,
     );
 
     if (!selectedArticle) return;
@@ -102,18 +109,13 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
     if (existingArticle) {
       setSelectedArticles((prev) =>
         prev.map((article) =>
-          article.id === selectedId
-            ? { ...article, amount: (article.amount || 1) + 1 }
-            : article,
+          article.id === selectedId ? { ...article } : article,
         ),
       );
     } else {
-      setSelectedArticles((prev) => [
-        ...prev,
-        { ...selectedArticle, amount: 1 },
-      ]);
+      setSelectedArticles((prev) => [...prev, selectedArticle]);
     }
-  };*/
+  };
 
   const handleCreateCustomArticle = (article: ArticleType) => {
     setCustomArticles((prev) => [...prev, article]);
@@ -126,16 +128,17 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
   };
 
   const onSubmit: SubmitHandler<OffersFormData> = async (data) => {
+    console.log("SUBMIT DATA", data);
     try {
       setIsLoading(true);
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const body = {
         data,
         articles: selectedArticles,
         articleList: articleList,
       };
+
+      console.log("SUBMIT DATA BODY", body);
 
       if (isEdit && offer) {
         //updateOfferMutate({ id: offer.id, body });
@@ -149,7 +152,6 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
       setCustomArticles([]);
     } catch (error) {
       console.error(error);
-      // Optionally, handle error state here
     }
     setIsLoading(false);
   };
@@ -173,85 +175,85 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
   return (
     <>
       <div className="card">
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 p-5 md:gap-5 md:p-7">
-            <Input
-              disabled={isLoading}
-              errors={errors}
-              required
-              {...register("customerName")}
-              id="customerName"
-              label="Customer Name"
-            />
-            <Input
-              disabled={isLoading}
-              errors={errors}
-              required
-              {...register("address")}
-              id="address"
-              label="Address"
-              type="text"
-            />
-            <Input
-              disabled={isLoading}
-              errors={errors}
-              required
-              {...register("city")}
-              id="city"
-              label="City"
-              type="text"
-              className="capitalize"
-            />
-            <Input
-              disabled={isLoading}
-              errors={errors}
-              required
-              {...register("email")}
-              id="email"
-              label="Email"
-              type="email"
-            />
-            <Input
-              disabled={isLoading}
-              errors={errors}
-              required
-              {...register("phone")}
-              id="phone"
-              label="Phone"
-              type="number"
-            />
-            {/*<Select
-              label="Article"
-              placeholder="Select article..."
-              disabled={isLoading}
-              {...register("article")}
-              onChange={handleOnSelect}
-            >
-              <option value="">Select article...</option>
-              {?.map((option) => (
-                <option key={option.id} value={option.id}>
-                  {option.name}
-                </option>
-              ))}
-            </Select>*/}
-
-            <div className="flex flex-col justify-end pt-2 sm:p-0">
-              <Button
-                secondary
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 p-5 md:gap-5 md:p-7">
+              <Input
                 disabled={isLoading}
-                onClick={handleOpenDrawer}
-                fullWidth
+                errors={errors}
+                required
+                register={register}
+                id="customerName"
+                label={"Customer name"}
+              />
+              <Input
+                disabled={isLoading}
+                errors={errors}
+                required
+                register={register}
+                id="address"
+                label={"Address"}
+              />
+              <Input
+                disabled={isLoading}
+                errors={errors}
+                required
+                register={register}
+                id="city"
+                label={"City"}
+              />
+              <Input
+                disabled={isLoading}
+                errors={errors}
+                required
+                register={register}
+                id="email"
+                label={"Email"}
+                type={"email"}
+              />
+              <Input
+                disabled={isLoading}
+                errors={errors}
+                required
+                register={register}
+                id="phone"
+                label={"Phone number"}
+                type={"number"}
+              />
+              <Select
+                label="Article"
+                placeholder="Select article..."
+                disabled={isLoading}
+                {...register("article")}
+                onChange={handleOnSelect}
+                error={!!errors.article}
+                helperText={errors.article?.message}
               >
-                Custom article
-              </Button>
-            </div>
+                {articles?.map((option: ArticleType) => (
+                  <option key={option.id} value={option.id || 0}>
+                    {option.name} ({option?.price}€)
+                  </option>
+                ))}
+              </Select>
 
-            <div className="flex flex-col justify-end pt-2 sm:p-0">
-              <Button disabled={isLoading} fullWidth type="submit">
-                {isEdit ? "Update offer" : "Create offer"}
-              </Button>
+              <div className="flex flex-col justify-end pt-2 sm:p-0">
+                <Button
+                  secondary
+                  disabled={isLoading}
+                  onClick={handleOpenDrawer}
+                  fullWidth
+                >
+                  Custom article
+                </Button>
+              </div>
+
+              <div className="flex flex-col justify-end pt-2 sm:p-0">
+                <Button disabled={isLoading} fullWidth type="submit">
+                  {isEdit ? "Update offer" : "Create offer"}
+                </Button>
+              </div>
             </div>
-          </div>
+          </form>
         </FormProvider>
       </div>
       <div className="mt-7">
@@ -261,6 +263,8 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
             article={article}
             offerItem={true}
             onDelete={() => handleDeleteArticle(article.id)}
+            onSelect={() => {}}
+            setEdit={() => {}}
           />
         ))}
       </div>
@@ -271,7 +275,7 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
         title="Create article"
       >
         <ArticleForm
-          forOffer="true"
+          forOffer={true}
           createCustomArticle={handleCreateCustomArticle}
         />
       </CustomDrawer>

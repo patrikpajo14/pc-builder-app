@@ -1,12 +1,20 @@
 "use client";
 import PageSubheader from "@/components/PageSubheader";
 import WidgetsRow from "@/components/dashboard/WidgetsRow";
-//import { OffersTable } from "@/components/offers";
 import Link from "next/link";
 import React from "react";
 import { OffersTable } from "@/components/offers";
+import { DashboardData } from "@/types";
 
 const Dashboard = () => {
+  const data: DashboardData = {
+    totalOffers: 10,
+    offersDone: 6,
+    offersPending: 3,
+    offersRejected: 1,
+    lastOffers: [],
+  };
+
   return (
     <section>
       <PageSubheader
@@ -23,7 +31,7 @@ const Dashboard = () => {
         }
       />
 
-      <WidgetsRow />
+      <WidgetsRow data={data} />
 
       <OffersTable limit={5} />
     </section>

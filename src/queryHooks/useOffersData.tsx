@@ -95,3 +95,18 @@ export const useDeleteOffer = () => {
     },
   });
 };
+
+/*
+*
+        "id": 4,
+        "name": "admin@gmail.com-Gaming PC Offer",
+        "customer_name": "admin admin",
+        "customer_address": "Ulica 12",
+        "customer_email": "admin@gmail.com",
+        "phone_number": null,
+        "create_date": "2024-11-16",
+        "status": "pending",
+        "pcId": 9,
+        "userId": 553
+    },
+* */

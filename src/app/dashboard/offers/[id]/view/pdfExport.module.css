@@ -1,0 +1,9 @@
+.pdf-export {
+  background-color: #232a33 !important;
+  color: black !important;
+}
+
+.pdf-export * {
+  background-color: inherit !important;
+  color: inherit !important;
+}
