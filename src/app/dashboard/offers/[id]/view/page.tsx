@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import PageSubheader from "@/components/PageSubheader";
 import Link from "next/link";
@@ -11,18 +11,25 @@ import html2canvas from "html2canvas";
 import { useFetchOfferById } from "@/queryHooks/useOffersData";
 import ArticleList from "@/components/article/ArticleList";
 import "./pdfExport.module.css";
+import { Article } from "@/types";
 
 const OfferView = () => {
   const params = useParams();
+  const [articleList, setArticleList] = useState<Article[]>();
   const { data: offer, isPending } = useFetchOfferById(params.id);
   console.log("OFFER", offer);
 
+  useEffect(() => {
+    if (offer) {
+      setArticleList([...offer?.pcs, ...offer?.customPcs]);
+    }
+  }, [offer]);
   const exportPDF = () => {
     const editButton = document.getElementById("editOfferButton");
-    const newOfferButton = document.getElementById("newOfferButton");
+    const exportPdfButton = document.getElementById("exportPdfButton");
 
     if (editButton) editButton.style.display = "none";
-    if (newOfferButton) newOfferButton.style.display = "none";
+    if (exportPdfButton) exportPdfButton.style.display = "none";
 
     const input = document.getElementById("exportable-section");
 
@@ -40,7 +47,7 @@ const OfferView = () => {
 
         // Revert visibility of the buttons after capturing
         if (editButton) editButton.style.display = "";
-        if (newOfferButton) newOfferButton.style.display = "";
+        if (exportPdfButton) exportPdfButton.style.display = "";
 
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
@@ -91,9 +98,18 @@ const OfferView = () => {
         console.error("Failed to generate PDF:", err);
         input.classList.remove("pdf-export");
         if (editButton) editButton.style.display = "";
-        if (newOfferButton) newOfferButton.style.display = "";
+        if (exportPdfButton) exportPdfButton.style.display = "";
       });
   };
+
+  let formattedDate = "Invalid Date";
+  if (!isPending && offer && offer?.createDate) {
+    try {
+      formattedDate = format(parseISO(offer.createDate), "dd.MM.yyyy");
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   return (
     <>
@@ -103,11 +119,7 @@ const OfferView = () => {
           body={
             <div className="flex gap-4 items-center">
               <div>
-                {/*<p>
-                  {!isPending
-                    ? format(parseISO(offer?.create_date), "dd.MM.yyyy")
-                    : ""}
-                </p>*/}
+                <p>{formattedDate && formattedDate}</p>
               </div>
               {offer?.status !== "done" && (
                 <Link
@@ -118,13 +130,14 @@ const OfferView = () => {
                   Edit offer
                 </Link>
               )}
-              <Link
-                href={"/dashboard/offers/create"}
-                id="newOfferButton"
+
+              <button
+                id="exportPdfButton"
+                onClick={exportPDF}
                 className="primary_btn"
               >
-                New offer
-              </Link>
+                Export as PDF
+              </button>
             </div>
           }
         />
@@ -135,26 +148,24 @@ const OfferView = () => {
           <div>
             <div className="mb-7">
               <p>Name: {offer?.customer_name}</p>
-              <p>Phone: {offer?.customer_phone_number}</p>
+              <p>Phone: {offer?.phone_number}</p>
               <p>Email: {offer?.customer_email}</p>
               <p>
                 Address: {offer?.customer_address}, {offer?.place?.place_name}
               </p>
-              <p className="font-bold text-[18px]">
-                Total price: {offer?.total} €
-              </p>
-              <button onClick={exportPDF} className="mt-4 primary_btn">
-                Export as PDF
-              </button>
+              {offer?.price && (
+                <p className="font-bold text-[18px]">
+                  Total price: {offer?.price} €
+                </p>
+              )}
             </div>
 
-            <div>
-              <h2 className="mb-4 font-bold text-[20px]">Articles</h2>
-              <ArticleList
-                readOnly={true}
-                articleList={offer?.articleList || []}
-              />
-            </div>
+            {articleList && (
+              <div>
+                <h2 className="mb-4 font-bold text-[20px]">Articles</h2>
+                <ArticleList readOnly={true} articleList={articleList || []} />
+              </div>
+            )}
           </div>
         )}
       </section>

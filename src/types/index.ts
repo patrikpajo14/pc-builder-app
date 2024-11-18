@@ -24,19 +24,16 @@ export interface Session {
 
 export interface Offer {
   id: number;
-  create_date: string;
+  createDate: string;
   customer_name: string;
   customer_email: string;
-  customer_phone: string;
+  phone_number: string;
   customer_address: string;
-  place?: Place;
+  customer_city?: string;
+  price?: string;
+  customPcs: Article[];
+  pcs: Article[];
   status: StatusType;
-  total: number;
-
-  // Additional properties
-  description?: string;
-  items?: OfferItem[];
-  // Add other properties as needed
 }
 
 export interface OfferItem {
@@ -49,16 +46,8 @@ export interface OfferItem {
 
 export type StatusType = "pending" | "done" | "rejected";
 
-export interface Place {
-  place_name?: string;
-  // Add other properties if needed
-}
-
-// src/types/index.ts
-
-// Article Interface
 export interface Article {
-  id?: number | null;
+  id: number;
   name: string;
   processor: Processor;
   motherboard: Motherboard;
@@ -67,6 +56,7 @@ export interface Article {
   storage: Storage;
   caseEntity: Case;
   powerSupply: PowerSupply;
+  price: number;
 }
 
 // Case Interface

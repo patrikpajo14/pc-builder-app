@@ -19,6 +19,7 @@ interface OfferRow {
   };
   status: StatusType;
   total: number;
+  createDate: string;
 }
 
 interface OffersTableRowProps {
@@ -37,7 +38,14 @@ const OffersTableRow: React.FC<OffersTableRowProps> = ({
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
   const [toggleDropdown, setToggleDropdown] = useState<boolean>(false);
 
-  const formattedDate = format(parseISO(row.create_date), "dd.MM.yyyy");
+  let formattedDate = "Invalid Date";
+  if (row.createDate) {
+    try {
+      formattedDate = format(parseISO(row.createDate), "dd.MM.yyyy");
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   const handleCloseConfirm = () => {
     setOpenConfirm(false);
@@ -45,6 +53,7 @@ const OffersTableRow: React.FC<OffersTableRowProps> = ({
 
   const handleChangeStatus = (status: StatusType) => {
     // updateStatus({ id: row.id, status });
+    console.log("STATUS", status);
     setToggleDropdown(false);
   };
 
@@ -113,11 +122,7 @@ const OffersTableRow: React.FC<OffersTableRowProps> = ({
             onClose={handleCloseConfirm}
             title="Izbriši"
             content="Jeste li sigurni da želite obrisati?"
-            action={
-              <Button primary onClick={onDeleteRow}>
-                Izbriši
-              </Button>
-            }
+            action={<Button onClick={onDeleteRow}>Izbriši</Button>}
           />
         </td>
       </tr>

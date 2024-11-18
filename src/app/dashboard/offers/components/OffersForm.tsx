@@ -9,7 +9,7 @@ import Input from "@/components/forms/Input";
 import Article from "@/components/article/Article";
 import ArticleForm from "@/components/article/ArticleForm";
 import CustomDrawer from "@/components/CustomDrawer";
-import { Offer, Article as ArticleType, PowerSupply } from "@/types";
+import { Offer, Article as ArticleType } from "@/types";
 import { useFetchArticles } from "@/queryHooks/useArticleData";
 import Select from "@/components/forms/Select";
 
@@ -30,7 +30,7 @@ interface OffersFormData {
 const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [selectedArticles, setSelectedArticles] = useState<ArticleType[]>(
-    offer ? offer?.pcId : [],
+    offer ? [...offer?.pcs, ...offer.customPcs] : [],
   );
   const [customArticles, setCustomArticles] = useState<ArticleType[]>([]);
   const [articleList, setArticleList] = useState<ArticleType[]>([]);
@@ -38,7 +38,8 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
 
   const { data: articles, status } = useFetchArticles();
 
-  console.log("ARTICLES", articles);
+  console.log("SELECTED ARTICLES", selectedArticles);
+  console.log("SELECTED OFFER", offer);
 
   const handleCloseDrawer = () => {
     setOpenDrawer(false);
@@ -61,9 +62,9 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
     () => ({
       customerName: offer?.customer_name || "",
       address: offer?.customer_address || "",
-      city: offer?.place?.place_name || "",
+      city: offer?.customer_city || "",
       email: offer?.customer_email || "",
-      phone: offer?.customer_phone || "",
+      phone: offer?.phone_number || "",
       article: "",
     }),
     [offer],

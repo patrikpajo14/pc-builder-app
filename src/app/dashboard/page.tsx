@@ -4,16 +4,12 @@ import WidgetsRow from "@/components/dashboard/WidgetsRow";
 import Link from "next/link";
 import React from "react";
 import { OffersTable } from "@/components/offers";
-import { DashboardData } from "@/types";
+import { useFetchDashboard } from "@/queryHooks/useDashboardData";
 
 const Dashboard = () => {
-  const data: DashboardData = {
-    totalOffers: 10,
-    offersDone: 6,
-    offersPending: 3,
-    offersRejected: 1,
-    lastOffers: [],
-  };
+  const { data, isPending } = useFetchDashboard();
+
+  console.log("DASHBOARD", data);
 
   return (
     <section>
@@ -31,7 +27,7 @@ const Dashboard = () => {
         }
       />
 
-      <WidgetsRow data={data} />
+      <WidgetsRow data={data} isPending={isPending} />
 
       <OffersTable limit={5} />
     </section>

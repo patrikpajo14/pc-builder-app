@@ -40,7 +40,7 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [filterName, setFilterName] = useState<string>("");
   const debouncedSearchValue = useDebounce(searchValue, 500);
-  const { data: offers, status, isLoading } = useFetchOffers();
+  const { data: offers, isPending } = useFetchOffers();
   const [offersList, setOffersList] = useState<Offer[]>(offers);
 
   const { mutate: deleteOffer } = useDeleteOffer();
@@ -151,19 +151,9 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
         <table className="min-w-[800px]">
           <TableHeadCustom headLabel={TABLE_HEAD} />
           <tbody>
-            {!isLoading && !limit
-              ? offersList?.map((row) => (
-                  <OffersTableRow
-                    key={row.id}
-                    row={row}
-                    onDeleteRow={() => handleDeleteRow(row.id)}
-                    onEditRow={() => handleEditRow(row.id)}
-                    onViewRow={() => handleViewRow(row.id)}
-                  />
-                ))
-              : offersList
-                  ?.slice(0, limit)
-                  ?.map((row) => (
+            {!isPending && offersList
+              ? offersList && !limit
+                ? offersList?.map((row) => (
                     <OffersTableRow
                       key={row.id}
                       row={row}
@@ -171,22 +161,34 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
                       onEditRow={() => handleEditRow(row.id)}
                       onViewRow={() => handleViewRow(row.id)}
                     />
-                  ))}
+                  ))
+                : offersList
+                    ?.slice(0, limit)
+                    ?.map((row) => (
+                      <OffersTableRow
+                        key={row.id}
+                        row={row}
+                        onDeleteRow={() => handleDeleteRow(row.id)}
+                        onEditRow={() => handleEditRow(row.id)}
+                        onViewRow={() => handleViewRow(row.id)}
+                      />
+                    ))
+              : ""}
             <TableEmptyRows
               emptyRows={
-                !isLoading && offersList?.length && offersList.length < 5
+                !isPending && offersList?.length && offersList.length < 5
                   ? 5 - offersList.length
                   : 0
               }
               height={
-                !isLoading && offersList?.length && offersList.length < 5
+                !isPending && offersList?.length && offersList.length < 5
                   ? 60
                   : 0
               }
             />
             <TableNoData
               isNotFound={offersList?.length === 0 || offersList === undefined}
-              title={isLoading ? "Table is loading..." : "No data in table"}
+              title={isPending ? "Table is loading..." : "No data in table"}
             />
           </tbody>
         </table>
