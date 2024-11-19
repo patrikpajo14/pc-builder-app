@@ -13,7 +13,12 @@ import Image from "next/image";
 import clsx from "clsx";
 import { Offer } from "@/types";
 import useDebounce from "@/hooks/useDebounce";
-import { useDeleteOffer, useFetchOffers } from "@/queryHooks/useOffersData";
+import {
+  useDeleteOffer,
+  useFetchOfferByUserId,
+  useFetchOffers,
+} from "@/queryHooks/useOffersData";
+import { useAuthContext } from "@/context/auth/authContext";
 
 interface TableHead {
   id: string;
@@ -37,11 +42,20 @@ interface OffersTableProps {
 
 const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
   const { push } = useRouter();
+  const { user } = useAuthContext();
   const [searchValue, setSearchValue] = useState<string>("");
   const [filterName, setFilterName] = useState<string>("");
   const debouncedSearchValue = useDebounce(searchValue, 500);
-  const { data: offers, isPending } = useFetchOffers();
+  const { data: generalOffers, isPending: generalIsPending } = useFetchOffers();
+  const { data: userOffers, isPending: userIsPending } = useFetchOfferByUserId(
+    user?.id || 0,
+  );
+  const offers = user?.role === "USER" ? userOffers : generalOffers;
+  const isLoading = user?.role === "USER" ? userIsPending : generalIsPending;
+
   const [offersList, setOffersList] = useState<Offer[]>(offers);
+
+  console.log("OFFERS", offers, "OFFERS LIST", offersList);
 
   const { mutate: deleteOffer } = useDeleteOffer();
 
@@ -151,7 +165,7 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
         <table className="min-w-[800px]">
           <TableHeadCustom headLabel={TABLE_HEAD} />
           <tbody>
-            {!isPending && offersList
+            {!isLoading && offersList
               ? offersList && !limit
                 ? offersList?.map((row) => (
                     <OffersTableRow
@@ -176,19 +190,19 @@ const OffersTable: React.FC<OffersTableProps> = ({ limit }) => {
               : ""}
             <TableEmptyRows
               emptyRows={
-                !isPending && offersList?.length && offersList.length < 5
+                !isLoading && offersList?.length && offersList.length < 5
                   ? 5 - offersList.length
                   : 0
               }
               height={
-                !isPending && offersList?.length && offersList.length < 5
+                !isLoading && offersList?.length && offersList.length < 5
                   ? 60
                   : 0
               }
             />
             <TableNoData
               isNotFound={offersList?.length === 0 || offersList === undefined}
-              title={isPending ? "Table is loading..." : "No data in table"}
+              title={isLoading ? "Table is loading..." : "No data in table"}
             />
           </tbody>
         </table>

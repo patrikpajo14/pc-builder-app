@@ -177,7 +177,17 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
       (selectedCase?.price || 0) +
       (selectedPowersupply?.price || 0);
 
-    setValue("price", parseInt(totalPrice), { shouldValidate: true });
+    console.log("TOTAL PRICE", totalPrice, selectedArticle?.price);
+
+    setValue(
+      "price",
+      selectedArticle
+        ? parseInt(totalPrice || selectedArticle?.price)
+        : parseInt(totalPrice),
+      {
+        shouldValidate: true,
+      },
+    );
   }, [
     watchedFields,
     processors,

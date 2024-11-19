@@ -7,6 +7,7 @@ import { format, parseISO } from "date-fns";
 import { SelectStatus } from ".";
 import clsx from "clsx";
 import { Offer } from "@/types";
+import { useUpdateOffer } from "@/queryHooks/useOffersData";
 
 type StatusType = "done" | "pending" | "rejected";
 
@@ -25,6 +26,7 @@ const OffersTableRow: React.FC<OffersTableRowProps> = ({
 }) => {
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
   const [toggleDropdown, setToggleDropdown] = useState<boolean>(false);
+  const { mutate: updateOffer } = useUpdateOffer();
 
   let formattedDate = "Invalid Date";
   if (row.createDate) {
@@ -40,8 +42,12 @@ const OffersTableRow: React.FC<OffersTableRowProps> = ({
   };
 
   const handleChangeStatus = (status: StatusType) => {
-    // updateStatus({ id: row.id, status });
-    console.log("STATUS", status);
+    const body = {
+      ...row,
+      status: status,
+    };
+    console.log("HANDLE CHANGE STATUS", body);
+    updateOffer({ id: row.id, offer: body });
     setToggleDropdown(false);
   };
 

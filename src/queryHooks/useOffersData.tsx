@@ -7,6 +7,10 @@ const fetchOffers = () => {
   return axiosPrivate.get(`/api/offers`);
 };
 
+const fetchOffersByUserId = (id: number) => {
+  return axiosPrivate.get(`/api/offers/byuser/${id}`);
+};
+
 const fetchOfferById = (id: number) => {
   return axiosPrivate.get(`/api/offers/${id}`);
 };
@@ -28,6 +32,15 @@ export const useFetchOffers = () => {
   return useQuery({
     queryKey: ["offer-list"],
     queryFn: () => fetchOffers(),
+    select: (response) => response.data,
+  });
+};
+
+export const useFetchOfferByUserId = (userId: number) => {
+  return useQuery({
+    queryKey: ["user-offers", userId],
+    queryFn: () => fetchOffersByUserId(userId),
+    enabled: !!userId,
     select: (response) => response.data,
   });
 };

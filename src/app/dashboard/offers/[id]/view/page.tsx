@@ -38,7 +38,7 @@ const OfferView = () => {
       return;
     }
 
-    html2canvas(input, { scale: 4 })
+    html2canvas(input, { scale: 2 })
       .then((canvas) => {
         // Remove the 'pdf-export' class after capturing
         input.classList.remove("pdf-export");
@@ -76,9 +76,9 @@ const OfferView = () => {
         }
 
         const pdf = new jsPDF({
-          orientation: "landscape",
+          //orientation: "landscape",
           unit: "pt",
-          format: [pageWidth, pageHeight], // A4 size in landscape
+          //format: [pageWidth, pageHeight], // A4 size in landscape
         });
 
         const imgData = canvas.toDataURL("image/png");
@@ -111,7 +111,10 @@ const OfferView = () => {
 
   return (
     <>
-      <section className="max-h-[calc(100vh - 50px)]" id="exportable-section">
+      <section
+        className="max-h-[calc(100vh - 50px)] bg-[#29313c] p-5"
+        id="exportable-section"
+      >
         <PageSubheader
           title={`Preview offer: ${params.id}`}
           body={
