@@ -1,9 +1,9 @@
-.pdf-export {
+#exportable-section {
   background-color: #232a33 !important;
   color: black !important;
 }
 
-.pdf-export * {
+#exportable-section * {
   background-color: inherit !important;
   color: inherit !important;
 }

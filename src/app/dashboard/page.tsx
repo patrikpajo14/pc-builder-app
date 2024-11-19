@@ -5,6 +5,7 @@ import Link from "next/link";
 import React from "react";
 import { OffersTable } from "@/components/offers";
 import { useFetchDashboard } from "@/queryHooks/useDashboardData";
+import PageLoader from "@/components/PageLoader/PageLoader";
 
 const Dashboard = () => {
   const { data, isPending } = useFetchDashboard();
@@ -26,10 +27,15 @@ const Dashboard = () => {
           </div>
         }
       />
+      {isPending && !data ? (
+        <PageLoader />
+      ) : (
+        <>
+          <WidgetsRow data={data} isPending={isPending} />
 
-      <WidgetsRow data={data} isPending={isPending} />
-
-      <OffersTable limit={5} />
+          <OffersTable limit={5} />
+        </>
+      )}
     </section>
   );
 };

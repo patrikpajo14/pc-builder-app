@@ -12,6 +12,7 @@ import CustomDrawer from "@/components/CustomDrawer";
 import { Offer, Article as ArticleType } from "@/types";
 import { useFetchArticles } from "@/queryHooks/useArticleData";
 import Select from "@/components/forms/Select";
+import { useCreateOffer, useUpdateOffer } from "@/queryHooks/useOffersData";
 
 interface OffersFormProps {
   isEdit?: boolean;
@@ -20,10 +21,10 @@ interface OffersFormProps {
 
 interface OffersFormData {
   customerName: string;
-  address: string;
+  customerAddress: string;
   city: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   article: string;
 }
 
@@ -36,7 +37,11 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
   const [articleList, setArticleList] = useState<ArticleType[]>([]);
   const [openDrawer, setOpenDrawer] = useState<boolean>(false);
 
-  const { data: articles, status } = useFetchArticles();
+  const { data: articles } = useFetchArticles();
+  const { mutate: createOffer } = useCreateOffer();
+  const { mutate: updateOffer } = useUpdateOffer();
+
+  console.log("ARTICLESS", articles);
 
   console.log("SELECTED ARTICLES", selectedArticles);
   console.log("SELECTED OFFER", offer);
@@ -49,22 +54,28 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
     setOpenDrawer(true);
   };
 
+  const calculateTotalPrice = (articles) => {
+    return articles.reduce((total, article) => {
+      return total + (article.price ? parseFloat(article.price) : 0);
+    }, 0);
+  };
+
   const OffersSchema = Yup.object().shape({
     customerName: Yup.string().required("Required"),
-    address: Yup.string().required("Required"),
+    customerAddress: Yup.string().required("Required"),
     city: Yup.string().required("Required"),
     email: Yup.string().email("Invalid email").required("Required"),
-    phone: Yup.string().required("Required"),
+    phoneNumber: Yup.string().required("Required"),
     article: Yup.string(),
   });
 
   const defaultValues: OffersFormData = useMemo(
     () => ({
       customerName: offer?.customer_name || "",
-      address: offer?.customer_address || "",
+      customerAddress: offer?.customer_address || "",
       city: offer?.customer_city || "",
       email: offer?.customer_email || "",
-      phone: offer?.phone_number || "",
+      phoneNumber: offer?.phone_number || "",
       article: "",
     }),
     [offer],
@@ -131,21 +142,29 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
   const onSubmit: SubmitHandler<OffersFormData> = async (data) => {
     console.log("SUBMIT DATA", data);
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
+
+      console.log("ARTICLE LIST ", articleList);
+      const totalPrice = calculateTotalPrice(articleList);
 
       const body = {
-        data,
-        articles: selectedArticles,
-        articleList: articleList,
+        city: data?.city,
+        customerAddress: data?.customerAddress,
+        customerName: data?.customerName,
+        email: data?.email,
+        phoneNumber: data?.phoneNumber,
+        pcs: selectedArticles,
+        customPcs: customArticles,
+        price: totalPrice,
       };
 
       console.log("SUBMIT DATA BODY", body);
 
       if (isEdit && offer) {
-        //updateOfferMutate({ id: offer.id, body });
+        updateOffer({ id: offer.id, offer: body });
         setSelectedArticles([]);
       } else {
-        //addOfferMutate(body);
+        createOffer(body);
         setSelectedArticles([]);
         setArticleList([]);
       }
@@ -154,24 +173,8 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
     } catch (error) {
       console.error(error);
     }
-    setIsLoading(false);
+    // setIsLoading(false);
   };
-
-  /*if (isArticlesLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <Loader sx="min-h-[250px]" />
-      </div>
-    );
-  }
-
-  if (isArticlesError) {
-    return (
-      <div className="text-center text-red-500">
-        Failed to load articles. Please try again later.
-      </div>
-    );
-  }*/
 
   return (
     <>
@@ -192,7 +195,7 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
                 errors={errors}
                 required
                 register={register}
-                id="address"
+                id="customerAddress"
                 label={"Address"}
               />
               <Input
@@ -217,7 +220,7 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
                 errors={errors}
                 required
                 register={register}
-                id="phone"
+                id="phoneNumber"
                 label={"Phone number"}
                 type={"number"}
               />
@@ -278,6 +281,7 @@ const OffersForm: React.FC<OffersFormProps> = ({ isEdit = false, offer }) => {
         <ArticleForm
           forOffer={true}
           createCustomArticle={handleCreateCustomArticle}
+          closeEvent={handleCloseDrawer}
         />
       </CustomDrawer>
     </>

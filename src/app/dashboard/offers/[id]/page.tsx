@@ -3,9 +3,7 @@
 import React from "react";
 import PageSubheader from "@/components/PageSubheader";
 import { useParams } from "next/navigation";
-import { useGetOffersById } from "@/app/actions/GetOffers";
 import Loader from "@/components/Loader/Loader";
-import { Offer } from "@/types";
 import OffersForm from "@/app/dashboard/offers/components/OffersForm";
 import { useFetchOfferById } from "@/queryHooks/useOffersData";
 

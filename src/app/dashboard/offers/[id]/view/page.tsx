@@ -38,8 +38,6 @@ const OfferView = () => {
       return;
     }
 
-    input.classList.add("pdf-export");
-
     html2canvas(input, { scale: 4 })
       .then((canvas) => {
         // Remove the 'pdf-export' class after capturing

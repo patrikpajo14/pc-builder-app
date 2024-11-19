@@ -74,17 +74,18 @@ const Article: React.FC<ArticleProps> = ({
             <p>Power supply: {article.powerSupply?.name}</p>
             <p>
               Price:{" "}
-              {parseFloat(
-                String(
-                  article.processor?.price +
-                    article.motherboard?.price +
-                    article.graphicsCard?.price +
-                    article.memory?.price +
-                    article.storage?.price +
-                    article.caseEntity?.price +
-                    article.powerSupply?.price || 0,
-                ),
-              ).toFixed(2)}
+              {article?.price ||
+                parseFloat(
+                  String(
+                    article.processor?.price +
+                      article.motherboard?.price +
+                      article.graphicsCard?.price +
+                      article.memory?.price +
+                      article.storage?.price +
+                      article.caseEntity?.price +
+                      article.powerSupply?.price || 0,
+                  ),
+                ).toFixed(2)}
               €
             </p>
           </div>

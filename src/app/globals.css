@@ -57,13 +57,13 @@ body.sidebar-open .sidebar {
   width: calc(100vw - 300px);
   margin-left: auto;
   min-height: 100vh;
-  padding: 0 37px ;
+  padding: 0 37px 30px;
 }
 .container-max {
   width: 100vw;
   margin-left: auto;
   min-height: 100vh;
-  padding: 0 40px;
+  padding: 0 40px 50px;
 }
 
 .sidebar ul {
@@ -127,10 +127,10 @@ body.sidebar-open .sidebar {
 @media screen and (max-width: 768px) {
   .container-fluid {
     width: 100%;
-    padding: 0 15px;
+    padding: 0 15px 20px;
   }
   .container-max {
-    padding: 0 15px;
+    padding: 0 15px 30px;
   }
 }
 

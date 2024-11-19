@@ -11,11 +11,12 @@ const fetchOfferById = (id: number) => {
   return axiosPrivate.get(`/api/offers/${id}`);
 };
 
-const createOffer = (offer: Offer) => {
+const createOffer = (offer: any) => {
   return axiosPrivate.post(`/api/offers`, offer);
 };
 
 const updateOffer = (offer: { id: number; offer: Offer }) => {
+  console.log("UPDATE OFFER", offer);
   return axiosPrivate.put(`/api/offers/${offer?.id}`, offer?.offer);
 };
 

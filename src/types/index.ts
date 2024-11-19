@@ -24,16 +24,17 @@ export interface Session {
 
 export interface Offer {
   id: number;
-  createDate: string;
   customer_name: string;
-  customer_email: string;
-  phone_number: string;
   customer_address: string;
   customer_city?: string;
-  price?: string;
-  customPcs: Article[];
-  pcs: Article[];
+  customer_email: string;
+  phone_number: string;
+  createDate: string;
   status: StatusType;
+  price?: string;
+  userId: number;
+  pcs: Article[];
+  customPcs: Article[];
 }
 
 export interface OfferItem {

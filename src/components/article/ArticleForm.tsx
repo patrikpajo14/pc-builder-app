@@ -47,6 +47,7 @@ interface ArticleFormProps {
 }
 
 interface ArticleFormData {
+  name: string;
   processor: number;
   motherboard: number;
   graphicsCard: number;
@@ -83,9 +84,10 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
   const { mutate: createArticle } = useCreateArticle();
   const { mutate: updateArticle } = useUpdateArticle();
 
-  console.log("IS EDIT", isEdit);
+  console.log("SelectedArticle", selectedArticle);
 
   const ArticleSchema = Yup.object().shape({
+    name: Yup.string().required("Required"),
     processor: Yup.number().required("Required"),
     motherboard: Yup.number().required("Required"),
     graphicsCard: Yup.number().required("Required"),
@@ -98,6 +100,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
 
   const defaultValues: ArticleFormData = useMemo(
     () => ({
+      name: selectedArticle?.name || "",
       processor: selectedArticle?.processor?.id || 0,
       motherboard: selectedArticle?.motherboard?.id || 0,
       graphicsCard: selectedArticle?.graphicsCard?.id || 0,
@@ -189,6 +192,7 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
 
   const onSubmit: SubmitHandler<ArticleFormData> = async (data) => {
     const completeArticle = {
+      name: data?.name,
       processor: selectedProcessor || null,
       motherboard: selectedMotherboard || null,
       graphicsCard: selectedGraphicscard || null,
@@ -196,69 +200,30 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
       storage: selectedStorage || null,
       caseEntity: selectedCase || null,
       powerSupply: selectedPowersupply || null,
-      // price: data.price,
+      price: data.price,
     };
 
     console.log("Complete Article:", completeArticle);
-    if (isEdit) {
-      updateArticle({ id: selectedArticle.id, article: completeArticle });
-    } else {
-      createArticle(completeArticle as Article);
-    }
 
-    /*if (!forOffer) {
+    if (!forOffer) {
       try {
         setLoading(true);
-        if (isEdit && article) {
-          updateArticleMutate({ id: article.id, body: data });
+        if (isEdit) {
+          updateArticle({ id: selectedArticle.id, article: completeArticle });
         } else {
-          addArticleMutate(data);
+          createArticle(completeArticle as Article);
         }
       } catch (error) {
         console.error("Error submitting form:", error);
-        // Optionally, set an error state here to display to the user
       } finally {
         setLoading(false);
         reset();
       }
     } else {
-      if (!idLoading && formParams && objectId) {
-        const id = objectId;
-        const type = formParams.types.find(
-          (type) => type.id === Number(data.processorId),
-        );
-        const panel = formParams.panels.find(
-          (panel) => panel.id === Number(data.motherboardId),
-        );
-        const color = formParams.colors.find(
-          (color) => color.id === Number(data.graphicsCardId),
-        );
-        const blinds = formParams.blindsTypes.find((blinds) => {
-          if (data.case === "") {
-            return blinds.name === "none";
-          }
-          return blinds.id === Number(data.case);
-        });
-
-        if (!type || !panel || !color) {
-          console.error("Missing form parameters");
-          return;
-        }
-
-        const name = type.name;
-        const customArticle: CustomArticle = {
-          ...data,
-          id,
-          name,
-          type,
-          panel,
-          color,
-          blinds: blinds || undefined,
-        };
-        createCustomArticle && createCustomArticle(customArticle);
-        reset();
-      }
-    }*/
+      if (completeArticle) createCustomArticle(completeArticle);
+      closeEvent();
+      reset();
+    }
   };
 
   const isDataLoading =
@@ -280,122 +245,134 @@ const ArticleForm: React.FC<ArticleFormProps> = ({
               <Loader />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-5">
-              <Select
-                label="Processor"
-                placeholder="Select processor..."
-                disabled={loading}
-                {...register("processor")}
-                error={!!errors.processor}
-                helperText={errors.processor?.message}
-              >
-                {processors?.map((option: Processor) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} ({option.price}€)
-                  </option>
-                ))}
-              </Select>
-              <Select
-                label="Motherboard"
-                placeholder="Select motherboard..."
-                disabled={loading}
-                {...register("motherboard")}
-                error={!!errors.motherboard}
-                helperText={errors.motherboard?.message}
-              >
-                {motherboards?.map((option: Motherboard) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} ({option.price}€)
-                  </option>
-                ))}
-              </Select>
+            <>
+              <div className="mb-5">
+                <Input
+                  disabled={loading}
+                  errors={errors}
+                  required
+                  register={register}
+                  id="name"
+                  label={"Pc name"}
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-5">
+                <Select
+                  label="Processor"
+                  placeholder="Select processor..."
+                  disabled={loading}
+                  {...register("processor")}
+                  error={!!errors.processor}
+                  helperText={errors.processor?.message}
+                >
+                  {processors?.map((option: Processor) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.price}€)
+                    </option>
+                  ))}
+                </Select>
+                <Select
+                  label="Motherboard"
+                  placeholder="Select motherboard..."
+                  disabled={loading}
+                  {...register("motherboard")}
+                  error={!!errors.motherboard}
+                  helperText={errors.motherboard?.message}
+                >
+                  {motherboards?.map((option: Motherboard) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.price}€)
+                    </option>
+                  ))}
+                </Select>
 
-              <Select
-                label="Graphics Card"
-                placeholder="Select graphics card..."
-                disabled={loading}
-                {...register("graphicsCard")}
-                error={!!errors.graphicsCard}
-                helperText={errors.graphicsCard?.message}
-              >
-                {graphicsCards?.map((option: GraphicsCard) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} ({option.price}€)
-                  </option>
-                ))}
-              </Select>
+                <Select
+                  label="Graphics Card"
+                  placeholder="Select graphics card..."
+                  disabled={loading}
+                  {...register("graphicsCard")}
+                  error={!!errors.graphicsCard}
+                  helperText={errors.graphicsCard?.message}
+                >
+                  {graphicsCards?.map((option: GraphicsCard) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.price}€)
+                    </option>
+                  ))}
+                </Select>
 
-              <Select
-                label="Memory"
-                placeholder="Select memory..."
-                disabled={loading}
-                {...register("memory")}
-                error={!!errors.memory}
-                helperText={errors.memory?.message}
-              >
-                {memory?.map((option: Memory) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} ({option.price}€)
-                  </option>
-                ))}
-              </Select>
+                <Select
+                  label="Memory"
+                  placeholder="Select memory..."
+                  disabled={loading}
+                  {...register("memory")}
+                  error={!!errors.memory}
+                  helperText={errors.memory?.message}
+                >
+                  {memory?.map((option: Memory) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.price}€)
+                    </option>
+                  ))}
+                </Select>
 
-              <Select
-                label="Storage"
-                placeholder="Select storage..."
-                disabled={loading}
-                {...register("storage")}
-                error={!!errors.storage}
-                helperText={errors.storage?.message}
-              >
-                {storages?.map((option: Storage) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} ({option.price}€)
-                  </option>
-                ))}
-              </Select>
+                <Select
+                  label="Storage"
+                  placeholder="Select storage..."
+                  disabled={loading}
+                  {...register("storage")}
+                  error={!!errors.storage}
+                  helperText={errors.storage?.message}
+                >
+                  {storages?.map((option: Storage) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.price}€)
+                    </option>
+                  ))}
+                </Select>
 
-              <Select
-                label="Case"
-                placeholder="Select case..."
-                disabled={loading}
-                {...register("caseEntity")}
-                error={!!errors.caseEntity}
-                helperText={errors.caseEntity?.message}
-              >
-                {cases?.map((option: Case) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} ({option.price}€)
-                  </option>
-                ))}
-              </Select>
+                <Select
+                  label="Case"
+                  placeholder="Select case..."
+                  disabled={loading}
+                  {...register("caseEntity")}
+                  error={!!errors.caseEntity}
+                  helperText={errors.caseEntity?.message}
+                >
+                  {cases?.map((option: Case) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.price}€)
+                    </option>
+                  ))}
+                </Select>
 
-              <Select
-                label="Power Supply"
-                placeholder="Select power supply..."
-                disabled={loading}
-                {...register("powerSupply")}
-                error={!!errors.powerSupply}
-                helperText={errors.powerSupply?.message}
-              >
-                {powerSupplys?.map((option: PowerSupply) => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} ({option.price}€)
-                  </option>
-                ))}
-              </Select>
-              <Input
-                errors={errors}
-                required
-                register={register}
-                id="price"
-                label={"Total Price €"}
-                type="number"
-                readOnly
-                min={0}
-                step="0.01"
-              />
-            </div>
+                <Select
+                  label="Power Supply"
+                  placeholder="Select power supply..."
+                  disabled={loading}
+                  {...register("powerSupply")}
+                  error={!!errors.powerSupply}
+                  helperText={errors.powerSupply?.message}
+                >
+                  {powerSupplys?.map((option: PowerSupply) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} ({option.price}€)
+                    </option>
+                  ))}
+                </Select>
+                <Input
+                  errors={errors}
+                  required
+                  register={register}
+                  id="price"
+                  label={"Total Price €"}
+                  type="number"
+                  readOnly
+                  min={0}
+                  step="0.01"
+                />
+              </div>
+            </>
           )}
         </div>
         <div className="mb-7">

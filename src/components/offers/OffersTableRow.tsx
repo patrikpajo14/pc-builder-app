@@ -6,24 +6,12 @@ import Image from "next/image";
 import { format, parseISO } from "date-fns";
 import { SelectStatus } from ".";
 import clsx from "clsx";
+import { Offer } from "@/types";
 
 type StatusType = "done" | "pending" | "rejected";
 
-interface OfferRow {
-  id: number;
-  create_date: string;
-  customer_name: string;
-  customer_address: string;
-  place?: {
-    place_name?: string;
-  };
-  status: StatusType;
-  total: number;
-  createDate: string;
-}
-
 interface OffersTableRowProps {
-  row: OfferRow;
+  row: Offer;
   onDeleteRow: () => void;
   onEditRow: () => void;
   onViewRow: () => void;
@@ -71,7 +59,7 @@ const OffersTableRow: React.FC<OffersTableRowProps> = ({
         </td>
 
         <td align="left" style={{ minWidth: "140px" }}>
-          {row.customer_address}, {row.place?.place_name}
+          {row.customer_address}, {row.customer_city}
         </td>
 
         <td align="left" style={{ minWidth: "100px", position: "relative" }}>
@@ -91,7 +79,7 @@ const OffersTableRow: React.FC<OffersTableRowProps> = ({
         </td>
 
         <td align="left" style={{ minWidth: "100px" }}>
-          {row.total} €
+          {row.price || 0} €
         </td>
 
         <td align="right" style={{ minWidth: "140px" }}>
