@@ -8,7 +8,6 @@ import { useFetchArticles } from "@/queryHooks/useArticleData";
 
 const ArticleListPage: React.FC = () => {
   const { data, status, error } = useFetchArticles();
-  console.log("ARTICLE LIST", data);
 
   return (
     <section>

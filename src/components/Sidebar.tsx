@@ -31,19 +31,21 @@ const Sidebar = () => {
       translate: "Articles",
       icon: "/icons/ico_article.svg",
     },
-    {
-      link: "administration",
-      translate: "Administration",
-      icon: "/icons/ico_administration.svg",
-    },
   ];
 
   if (user?.role === "ADMIN") {
-    sidebarItems.push({
-      link: "users",
-      translate: "Users",
-      icon: "/icons/ico_users.svg",
-    });
+    sidebarItems.push(
+      {
+        link: "users",
+        translate: "Users",
+        icon: "/icons/ico_users.svg",
+      },
+      {
+        link: "administration",
+        translate: "Administration",
+        icon: "/icons/ico_administration.svg",
+      },
+    );
   }
 
   return (

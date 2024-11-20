@@ -30,7 +30,7 @@ const AuthChecker: React.FC<AuthCheckerProps> = ({ children }) => {
     return <PageLoader />;
   }
 
-  if (!user.enabled && user.role === "USERR") {
+  if (!user.enabled && user.role === "USER") {
     return (
       <section className="container-max">
         <Nav />

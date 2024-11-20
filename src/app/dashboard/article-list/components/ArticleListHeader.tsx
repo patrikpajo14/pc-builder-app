@@ -5,8 +5,10 @@ import Button from "@/components/Button";
 import CustomDrawer from "@/components/CustomDrawer";
 import PageSubheader from "@/components/PageSubheader";
 import ArticleForm from "@/components/article/ArticleForm";
+import { useAuthContext } from "@/context/auth/authContext";
 
 const ArticleListHeader: React.FC = () => {
+  const { user } = useAuthContext();
   const [openDrawer, setOpenDrawer] = useState<boolean>(false);
   const handleCloseDrawer = (): void => {
     setOpenDrawer(false);
@@ -20,7 +22,13 @@ const ArticleListHeader: React.FC = () => {
     <>
       <PageSubheader
         title="Article List"
-        body={<Button onClick={handleOpenDrawer}>New Article</Button>}
+        body={
+          user?.role !== "USER" ? (
+            <Button onClick={handleOpenDrawer}>New Article</Button>
+          ) : (
+            ""
+          )
+        }
       />
 
       <CustomDrawer

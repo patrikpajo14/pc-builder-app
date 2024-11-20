@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import Button from "../Button";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { Article as ArticleItem } from "@/types";
+import { useAuthContext } from "@/context/auth/authContext";
 
 interface ArticleProps {
   openDrawer?: () => void;
@@ -26,6 +27,7 @@ const Article: React.FC<ArticleProps> = ({
   offerItem = false,
 }) => {
   const [openConfirm, setOpenConfirm] = useState<boolean>(false);
+  const { user } = useAuthContext();
 
   const handleEdit = () => {
     openDrawer();
@@ -54,7 +56,6 @@ const Article: React.FC<ArticleProps> = ({
           />
         </div>
         <div className="p-4 md:p-5 flex-1 flex gap-3 justify-between flex-wrap lg:flex-nowrap">
-          {/* Article Details Section 1 */}
           <div className="w-full flex flex-wrap gap-y-1 gap-x-3 md:gap-3 lg:w-auto lg:flex-col text-sm md:text-base">
             <p>Article: {article.name}</p>
             <p>Processor: {article.processor?.name}</p>
@@ -62,14 +63,12 @@ const Article: React.FC<ArticleProps> = ({
             <p>Graphics card: {article.graphicsCard?.name}</p>
           </div>
 
-          {/* Article Details Section 2 */}
           <div className="w-full flex flex-wrap gap-y-1 gap-x-3 md:gap-3 lg:w-auto lg:flex-col text-sm md:text-base">
             <p>Memory: {article.memory?.name}</p>
             <p>Storage: {article.storage?.name}</p>
             <p>Case: {article.caseEntity?.name}</p>
           </div>
 
-          {/* Article Details Section 3 */}
           <div className="w-full md:w-1/3 flex flex-wrap gap-y-1 gap-x-3 md:gap-3 lg:w-auto lg:flex-col text-sm md:text-base">
             <p>Power supply: {article.powerSupply?.name}</p>
             <p>
@@ -90,9 +89,8 @@ const Article: React.FC<ArticleProps> = ({
             </p>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-3 justify-between sm:justify-end lg:justify-center w-full md:w-1/2 lg:w-auto sm:flex-col text-sm md:text-base">
-            {!readOnly && !offerItem && (
+            {!readOnly && !offerItem && user?.role !== "USER" && (
               <>
                 <Button
                   onClick={() => {
@@ -118,7 +116,7 @@ const Article: React.FC<ArticleProps> = ({
           </div>
         </div>
       </div>
-      {/* Confirmation Dialog */}
+
       <ConfirmDialog
         open={openConfirm}
         onClose={handleCloseConfirm}

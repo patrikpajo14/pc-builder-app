@@ -81,6 +81,8 @@ export const useUpdateOffer = () => {
       console.log("UPDATE OFFER RESPONSE", response);
       if (response.status === 200 || response.status === 201) {
         queryClient.invalidateQueries({ queryKey: ["offer-list"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        queryClient.invalidateQueries({ queryKey: ["user-offers"] });
         toast.success("Offer updated successful!");
       }
       return response;
